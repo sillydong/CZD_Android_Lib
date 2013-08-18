@@ -1,0 +1,16 @@
+-optimizationpasses 5
+-dontusemixedcaseclassnames
+-dontskipnonpubliclibraryclasses
+-dontpreverify
+-verbose
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+
+-keep class android.support.v4.app.** { *; }
+-keep interface android.support.v4.app.** { *; }
+-keep class com.lib.** { *; }
+-keep interface com.lib.** { *; }
+-keepattributes *Annotation*
+
+-keepclassmembers class **.R$* {
+    public static <fields>;
+}

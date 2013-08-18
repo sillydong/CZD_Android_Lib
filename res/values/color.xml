@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<color name="white">#ffffff</color>
+	<color name="gray">#808080</color>
+	<color name="black">#000000</color>
+	<color name="blue">#33b5e5</color>
+	<color name="red">#b90000</color>
+	
+	<color name="lite_black">#505050</color>
+	<color name="lite_gray">#999999</color>
+	<color name="alpha_white">#9fffffff</color>
+	<color name="disable_gray">#ebebeb</color>
+	<color name="click_gray">#ebebeb</color>
+
+	<color name="vpi__background_holo_dark">#ff000000</color>
+	<color name="vpi__background_holo_light">#fff3f3f3</color>
+	<color name="vpi__bright_foreground_holo_dark">@color/vpi__background_holo_light</color>
+	<color name="vpi__bright_foreground_holo_light">@color/vpi__background_holo_dark</color>
+	<color name="vpi__bright_foreground_disabled_holo_dark">#ff4c4c4c</color>
+	<color name="vpi__bright_foreground_disabled_holo_light">#ffb2b2b2</color>
+	<color name="vpi__bright_foreground_inverse_holo_dark">@color/vpi__bright_foreground_holo_light</color>
+	<color name="vpi__bright_foreground_inverse_holo_light">@color/vpi__bright_foreground_holo_dark</color>
+
+</resources>
