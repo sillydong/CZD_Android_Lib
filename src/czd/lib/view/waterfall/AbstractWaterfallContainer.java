@@ -47,6 +47,8 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected WaterfallScrollListener scroll_listener = null;
 	protected WaterfallHandler handler = null;
 
+	protected boolean overscroll=false;
+
 	public AbstractWaterfallContainer(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		this.context = context;
@@ -168,6 +170,14 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 				scroll_listener.onScroll(this, l, t, oldl, oldt);
 			}
 			handler.sendMessageDelayed(handler.obtainMessage(0, t, oldt), 150);
+		}
+	}
+
+	@Override
+	protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
+		super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
+		if(clampedY){
+			this.overscroll=true;
 		}
 	}
 
@@ -439,7 +449,12 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 						waterfall.handleView(MOVE_DOWN);
 					}
 					else if (msg.arg1 < msg.arg2) {
-						waterfall.handleView(MOVE_UP);
+						if(waterfall.overscroll){
+							waterfall.handleView(MOVE_DOWN);
+						}
+						else{
+							waterfall.handleView(MOVE_UP);
+						}
 					}
 					else if (msg.arg1 >= msg.arg2) {
 						waterfall.handleView(MOVE_DOWN);
@@ -447,6 +462,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 					if (waterfall.scroll_listener != null) {
 						waterfall.scroll_listener.onStop(msg.arg1);
 					}
+					waterfall.overscroll=false;
 				}
 				waterfall.lastY = waterfall.getScrollY();
 				waterfall.whereami(msg.arg1);
