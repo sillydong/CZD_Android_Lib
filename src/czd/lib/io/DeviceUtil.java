@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo.State;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.Window;
@@ -73,6 +74,10 @@ public class DeviceUtil {
 		info.put("imei", manager.getDeviceId());
 		info.put("version", manager.getDeviceSoftwareVersion());
 		return info;
+	}
+
+	public static String getDeviceBrief(){
+		return Build.BRAND+"|"+Build.MODEL+"|"+Build.DEVICE+"|"+Build.VERSION.RELEASE+"|"+Build.VERSION.SDK_INT;
 	}
 
 	public static void call(Activity activity, String number, boolean alert) {
