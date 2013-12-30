@@ -27,17 +27,17 @@ import android.provider.MediaStore;
  * Date: 13-10-17
  * Time: 上午9:57
  */
-public class VideoThumbImage implements SmartImage{
+public class VideoImage implements SmartImage {
 	private int videoid;
 	private int thumbnailkind;
 
-	public VideoThumbImage(int videoid,int thumbnailkind){
-		this.videoid=videoid;
-		this.thumbnailkind=thumbnailkind;
+	public VideoImage(int videoid, int thumbnailkind) {
+		this.videoid = videoid;
+		this.thumbnailkind = thumbnailkind;
 	}
 
 	@Override
 	public Bitmap getBitmap(Context context) {
-		return MediaStore.Video.Thumbnails.getThumbnail(context.getContentResolver(),videoid,thumbnailkind,null);
+		return MediaStore.Video.Thumbnails.getThumbnail(context.getContentResolver(), videoid, thumbnailkind, null);
 	}
 }

@@ -19,12 +19,13 @@ public class Timer {
 
 	/**
 	 * stop Timer and print how long the action takes and restart the timer
-	 * 
+	 *
 	 * @param what
 	 */
 	public void stop(String what, boolean restart) {
 		stopTime = System.nanoTime();
-		if (restart) {
+		if (restart)
+		{
 			start();
 		}
 		long val = (stopTime - startTime) / 1000L;

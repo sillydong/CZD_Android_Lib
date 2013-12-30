@@ -8,7 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView.ScaleType;
-import czd.lib.application.ApplicationUtil;
+import czd.lib.cache.BitmapCache;
 import czd.lib.view.gestureimageview.GestureImageView;
 import czd.lib.view.progress.ProgressCircle;
 
@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 
 public class SmartGestureImageView extends FrameLayout {
 	protected static ExecutorService threadPool = Executors.newSingleThreadExecutor();
-	protected static Map<Context, List<WeakReference<Future<?>>>> requestMap = new WeakHashMap<Context, List<WeakReference<Future<?>>>>();
+	protected static Map<Context,List<WeakReference<Future<?>>>> requestMap = new WeakHashMap<Context,List<WeakReference<Future<?>>>>();
 
 	protected boolean loading = false;
 	protected SmartImageTask currentTask;
@@ -61,7 +61,8 @@ public class SmartGestureImageView extends FrameLayout {
 		imageview.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		imageview.setVisibility(View.INVISIBLE);
 		imageview.setRecycle(true);
-		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
+		{
 			imageview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
 		}
 		this.addView(imageview);
@@ -116,13 +117,15 @@ public class SmartGestureImageView extends FrameLayout {
 	}
 
 	public void setImage(final SmartImage image, final boolean useloading, final Integer fallbackResource, final SmartImageTask.OnCompleteListener completeListener) {
-		if (!loading || Thread.currentThread().isInterrupted()) {
+		if (!loading || Thread.currentThread().isInterrupted())
+		{
 			loading = true;
 
 			progress.setVisibility(View.VISIBLE);
 
 			// Cancel any existing tasks for this image view
-			if (currentTask != null) {
+			if (currentTask != null)
+			{
 				currentTask.cancel();
 				currentTask = null;
 			}
@@ -132,27 +135,34 @@ public class SmartGestureImageView extends FrameLayout {
 			currentTask.setOnCompleteHandler(new SmartImageTask.OnCompleteHandler() {
 				@Override
 				public void onComplete(Bitmap bitmap) {
-					if (loading) {
-						if (useloading) {
+					if (loading)
+					{
+						if (useloading)
+						{
 							progress.setVisibility(View.INVISIBLE);
 						}
-						file = ApplicationUtil.webImageCache.getFilePath(image.toString());
-						if (bitmap != null && !bitmap.isRecycled()) {
+						file = BitmapCache.getInstance().getRealName(image.toString());
+						if (bitmap != null && !bitmap.isRecycled())
+						{
 							width = bitmap.getWidth();
 							height = bitmap.getHeight();
 							imageview.setAdjustViewBounds(false);
 							imageview.setImageBitmap(bitmap);
-							if (completeListener != null) {
+							if (completeListener != null)
+							{
 								completeListener.onComplete(true);
 							}
 						}
-						else {
+						else
+						{
 							// Set fallback resource
-							if (fallbackResource != null) {
+							if (fallbackResource != null)
+							{
 								imageview.setAdjustViewBounds(false);
 								imageview.setImageResource(fallbackResource);
 							}
-							if (completeListener != null) {
+							if (completeListener != null)
+							{
 								completeListener.onComplete(false);
 							}
 							loading = false;
@@ -163,10 +173,12 @@ public class SmartGestureImageView extends FrameLayout {
 
 				@Override
 				public void onProgress(long current, long total) {
-					if (loading) {
+					if (loading)
+					{
 						progress.setMax(total);
 						progress.setProgress(current);
-						if (completeListener != null) {
+						if (completeListener != null)
+						{
 							completeListener.onProgress(current, total);
 						}
 					}
@@ -175,9 +187,11 @@ public class SmartGestureImageView extends FrameLayout {
 
 			// Run the task in a threadpool
 			request = threadPool.submit(currentTask);
-			if (request != null && context != null) {
+			if (request != null && context != null)
+			{
 				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-				if (requestList == null) {
+				if (requestList == null)
+				{
 					requestList = new LinkedList<WeakReference<Future<?>>>();
 					requestMap.put(context, requestList);
 				}
@@ -189,7 +203,7 @@ public class SmartGestureImageView extends FrameLayout {
 	}
 
 	public int[] getImageSize() {
-		return new int[] { width, height };
+		return new int[]{width, height};
 	}
 
 	public float getCurrentScale() {
@@ -206,11 +220,14 @@ public class SmartGestureImageView extends FrameLayout {
 
 	public void recycle() {
 		loading = false;
-		if (request != null) {
+		if (request != null)
+		{
 			request.cancel(true);
-			if (context != null) {
+			if (context != null)
+			{
 				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-				if (requestList != null) {
+				if (requestList != null)
+				{
 					requestList.remove(request);
 				}
 			}
@@ -227,10 +244,13 @@ public class SmartGestureImageView extends FrameLayout {
 
 	public static void cancelTasks(Context context, boolean mayInterruptIfRunning) {
 		List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-		if (requestList != null) {
-			for (WeakReference<Future<?>> requestRef : requestList) {
+		if (requestList != null)
+		{
+			for (WeakReference<Future<?>> requestRef : requestList)
+			{
 				Future<?> request = requestRef.get();
-				if (request != null) {
+				if (request != null)
+				{
 					request.cancel(mayInterruptIfRunning);
 				}
 			}

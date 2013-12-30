@@ -83,7 +83,8 @@ public class ProgressCircle extends View {
 
 	public void setProgress(long progress) {
 		this.progress = progress;
-		if (show) {
+		if (show)
+		{
 			setText(progress);
 		}
 		invalidate();
@@ -96,10 +97,12 @@ public class ProgressCircle extends View {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
-		if (progress > 0 && progress <= max) {
+		if (progress > 0 && progress <= max)
+		{
 			canvas.drawCircle(getWidth() / 2, getHeight() / 2, size / 2, back_p);
-			canvas.drawArc(rectf, -90, 360 * ((float) progress / (float) max), true, done_p);
-			if (show) {
+			canvas.drawArc(rectf, -90, 360 * ((float)progress / (float)max), true, done_p);
+			if (show)
+			{
 				this.text_p.getTextBounds(this.text, 0, this.text.length(), rect);
 				int x = (getWidth() / 2) - rect.centerX();
 				int y = (getHeight() / 2) - rect.centerY();

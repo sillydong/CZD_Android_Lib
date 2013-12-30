@@ -10,11 +10,11 @@ public interface AbsListPullListener {
 	public void onScrollStateChanged(AbsListView view, int scrollState);
 
 	public void onTop(int firstVisibleItem, int visibleItemCount, int totalItemCount);
-	
+
 	public void outTop(int firstVisibleItem, int visibleItemCount, int totalItemCount);
 
 	public void onBottom(int firstVisibleItem, int visibleItemCount, int totalItemCount);
-	
+
 	public void outBottom(int firstVisibleItem, int visibleItemCount, int totalItemCount);
 
 }

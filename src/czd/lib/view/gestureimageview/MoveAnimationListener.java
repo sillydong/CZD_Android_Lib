@@ -18,10 +18,9 @@ package czd.lib.view.gestureimageview;
 
 /**
  * @author Jason Polites
- *
  */
 public interface MoveAnimationListener {
 
 	public void onMove(float x, float y);
-	
+
 }

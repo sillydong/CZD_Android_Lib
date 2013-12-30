@@ -18,17 +18,19 @@ public class ViewUtil {
 	}
 
 	public static int dpToPx(Context context, float px) {
-		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, context.getResources().getDisplayMetrics());
+		return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, px, context.getResources().getDisplayMetrics());
 	}
 
 	public static int pxToDp(Context context, float dp) {
-		return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, dp, context.getResources().getDisplayMetrics());
+		return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, dp, context.getResources().getDisplayMetrics());
 	}
 
 	public static void fixBackgroundRepeat(View view) {
-		if (view != null) {
-			BitmapDrawable background = (BitmapDrawable) view.getBackground();
-			if (background != null) {
+		if (view != null)
+		{
+			BitmapDrawable background = (BitmapDrawable)view.getBackground();
+			if (background != null)
+			{
 				background.mutate();
 				background.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
 			}

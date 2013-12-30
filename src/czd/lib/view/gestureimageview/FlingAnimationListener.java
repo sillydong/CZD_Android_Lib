@@ -18,12 +18,11 @@ package czd.lib.view.gestureimageview;
 
 /**
  * @author Jason Polites
- *
  */
 public interface FlingAnimationListener {
 
 	public void onMove(float x, float y);
-	
+
 	public void onComplete();
-	
+
 }

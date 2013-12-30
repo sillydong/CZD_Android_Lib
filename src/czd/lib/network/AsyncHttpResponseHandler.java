@@ -25,7 +25,8 @@ public class AsyncHttpResponseHandler {
 
 	public AsyncHttpResponseHandler() {
 		// Set up a handler to post events back to the correct thread if possible
-		if (Looper.myLooper() != null) {
+		if (Looper.myLooper() != null)
+		{
 			handler = new MessageHandler(this);
 		}
 	}
@@ -70,15 +71,15 @@ public class AsyncHttpResponseHandler {
 	}
 
 	protected void sendSuccessMessage(int statusCode, String responseBody) {
-		sendMessage(obtainMessage(SUCCESS_MESSAGE, new Object[] { statusCode, responseBody }));
+		sendMessage(obtainMessage(SUCCESS_MESSAGE, new Object[]{statusCode, responseBody}));
 	}
 
 	protected void sendFailureMessage(Throwable e, String responseBody) {
-		sendMessage(obtainMessage(FAILURE_MESSAGE, new Object[] { e, responseBody }));
+		sendMessage(obtainMessage(FAILURE_MESSAGE, new Object[]{e, responseBody}));
 	}
 
 	protected void sendFailureMessage(Throwable e, byte[] responseBody) {
-		sendMessage(obtainMessage(FAILURE_MESSAGE, new Object[] { e, responseBody }));
+		sendMessage(obtainMessage(FAILURE_MESSAGE, new Object[]{e, responseBody}));
 	}
 
 	protected void sendStartMessage() {
@@ -91,7 +92,7 @@ public class AsyncHttpResponseHandler {
 	}
 
 	protected void sendProgressMessage(long current, long total) {
-		sendMessage(obtainMessage(PROGRESS_MESSAGE, new Object[] { current, total }));
+		sendMessage(obtainMessage(PROGRESS_MESSAGE, new Object[]{current, total}));
 	}
 
 	protected void handleSuccessMessage(int statusCode, String responseBody) {
@@ -109,43 +110,48 @@ public class AsyncHttpResponseHandler {
 	protected void handleMessage(Message msg) {
 		Object[] response;
 
-		switch (msg.what) {
-		case SUCCESS_MESSAGE:
-			response = (Object[]) msg.obj;
-			handleSuccessMessage(((Integer) response[0]).intValue(), (String) response[1]);
-			break;
-		case FAILURE_MESSAGE:
-			response = (Object[]) msg.obj;
-			handleFailureMessage((Throwable) response[0], (String) response[1]);
-			break;
-		case START_MESSAGE:
-			onStart();
-			break;
-		case FINISH_MESSAGE:
-			onFinish();
-			break;
-		case PROGRESS_MESSAGE:
-			response = (Object[]) msg.obj;
-			onProgress(((Long) response[0]).longValue(), ((Long) response[1]).longValue());
-			break;
+		switch (msg.what)
+		{
+			case SUCCESS_MESSAGE:
+				response = (Object[])msg.obj;
+				handleSuccessMessage(((Integer)response[0]).intValue(), (String)response[1]);
+				break;
+			case FAILURE_MESSAGE:
+				response = (Object[])msg.obj;
+				handleFailureMessage((Throwable)response[0], (String)response[1]);
+				break;
+			case START_MESSAGE:
+				onStart();
+				break;
+			case FINISH_MESSAGE:
+				onFinish();
+				break;
+			case PROGRESS_MESSAGE:
+				response = (Object[])msg.obj;
+				onProgress(((Long)response[0]).longValue(), ((Long)response[1]).longValue());
+				break;
 		}
 	}
 
 	protected void sendMessage(Message msg) {
-		if (handler != null) {
+		if (handler != null)
+		{
 			handler.sendMessage(msg);
 		}
-		else {
+		else
+		{
 			handleMessage(msg);
 		}
 	}
 
 	protected Message obtainMessage(int responseMessage, Object response) {
 		Message msg = null;
-		if (handler != null) {
+		if (handler != null)
+		{
 			msg = this.handler.obtainMessage(responseMessage, response);
 		}
-		else {
+		else
+		{
 			msg = new Message();
 			msg.what = responseMessage;
 			msg.obj = response;
@@ -155,25 +161,31 @@ public class AsyncHttpResponseHandler {
 
 	// Interface to AsyncHttpRequest
 	void sendResponseMessage(HttpResponse response) {
-		if (!cancel) {
+		if (!cancel)
+		{
 			StatusLine status = response.getStatusLine();
 			String responseBody = null;
-			try {
+			try
+			{
 				HttpEntity entity = null;
 				HttpEntity temp = response.getEntity();
-				if (temp != null) {
+				if (temp != null)
+				{
 					entity = new BufferedHttpEntity(temp);
 					responseBody = EntityUtils.toString(entity, "UTF-8");
 				}
-			} catch (IOException e) {
-				sendFailureMessage(e, (String) null);
+			} catch (IOException e)
+			{
+				sendFailureMessage(e, (String)null);
 				return;
 			}
 
-			if (status.getStatusCode() >= 300) {
+			if (status.getStatusCode() >= 300)
+			{
 				sendFailureMessage(new HttpResponseException(status.getStatusCode(), status.getReasonPhrase()), responseBody);
 			}
-			else {
+			else
+			{
 				sendSuccessMessage(status.getStatusCode(), responseBody);
 			}
 		}

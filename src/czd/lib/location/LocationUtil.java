@@ -14,19 +14,24 @@ public class LocationUtil {
 	public static String getAddress(Context context, Location loc) {
 		String result = "";
 		Geocoder gc = new Geocoder(context, Locale.getDefault());
-		try {
+		try
+		{
 			List<Address> addresses = gc.getFromLocation(loc.getLatitude(), loc.getLongitude(), 10);
-			if (addresses != null && addresses.size() > 0) {
+			if (addresses != null && addresses.size() > 0)
+			{
 				Address address = addresses.get(0);
 				int maxLine = address.getMaxAddressLineIndex();
-				if (maxLine >= 2) {
+				if (maxLine >= 2)
+				{
 					result = address.getAddressLine(1) + address.getAddressLine(2);
 				}
-				else {
+				else
+				{
 					result = address.getAddressLine(1);
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		return result;
@@ -34,17 +39,21 @@ public class LocationUtil {
 
 	public static Address searchLocationByName(Context context, String name) {
 		Geocoder gc = new Geocoder(context, Locale.getDefault());
-		try {
+		try
+		{
 			List<Address> addresses = gc.getFromLocationName(name, 1);
-			if (addresses != null) {
+			if (addresses != null)
+			{
 				Address address_send = null;
-				for (Address address : addresses) {
+				for (Address address : addresses)
+				{
 					address.getAddressLine(1);
 					address_send = address;
 				}
 				return address_send;
 			}
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 		return null;

@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import czd.lib.R;
-import czd.lib.application.ApplicationUtil;
+import czd.lib.cache.BitmapCache;
 import czd.lib.view.ViewUtil;
 import czd.lib.view.smartimageview.SmartImageTask.OnCompleteListener;
 
@@ -26,7 +26,7 @@ import java.util.concurrent.Future;
 
 public class SmartImageView extends FrameLayout {
 	protected static ExecutorService threadPool = Executors.newFixedThreadPool(3);
-	protected static Map<Context, List<WeakReference<Future<?>>>> requestMap = new WeakHashMap<Context, List<WeakReference<Future<?>>>>();
+	protected static Map<Context,List<WeakReference<Future<?>>>> requestMap = new WeakHashMap<Context,List<WeakReference<Future<?>>>>();
 
 	protected boolean loading = false;
 	protected SmartImageTask currentTask;
@@ -37,7 +37,7 @@ public class SmartImageView extends FrameLayout {
 	protected LinearLayout progress;
 	private int width = 0, height = 0;
 	private String file;
-	
+
 	private Bitmap imagebitmap;
 
 	public SmartImageView(Context context) {
@@ -65,7 +65,7 @@ public class SmartImageView extends FrameLayout {
 		imageview.setVisibility(View.INVISIBLE);
 		this.addView(imageview);
 		progress = new LinearLayout(context);
-		progress = (LinearLayout) ViewUtil.viewById(context, R.layout.common_loading_frame);
+		progress = (LinearLayout)ViewUtil.viewById(context, R.layout.common_loading_frame);
 		progress.setVisibility(View.INVISIBLE);
 		this.addView(progress);
 	}
@@ -99,13 +99,13 @@ public class SmartImageView extends FrameLayout {
 	public void setImageContact(long contactId, final Integer fallbackResource, final Integer loadingResource) {
 		setImage(new ContactImage(contactId), false, fallbackResource);
 	}
-	
-	public void setImageResource(int resId){
+
+	public void setImageResource(int resId) {
 		imageview.setImageResource(resId);
 		imageview.setVisibility(View.VISIBLE);
 	}
-	
-	public void setImageDrawable(Drawable drawable){
+
+	public void setImageDrawable(Drawable drawable) {
 		imageview.setImageDrawable(drawable);
 		imageview.setVisibility(View.VISIBLE);
 	}
@@ -124,14 +124,16 @@ public class SmartImageView extends FrameLayout {
 	}
 
 	public void setImage(final SmartImage image, final boolean useloading, final Integer fallbackResource, final OnCompleteListener completeListener) {
-		if (!loading || Thread.currentThread().isInterrupted()) {
+		if (!loading || Thread.currentThread().isInterrupted())
+		{
 			loading = true;
 
 			if (useloading)
 				progress.setVisibility(View.VISIBLE);
 
 			// Cancel any existing tasks for this image view
-			if (currentTask != null) {
+			if (currentTask != null)
+			{
 				currentTask.cancel();
 				currentTask = null;
 			}
@@ -142,31 +144,34 @@ public class SmartImageView extends FrameLayout {
 			currentTask.setOnCompleteHandler(new SmartImageTask.OnCompleteHandler() {
 				@Override
 				public void onComplete(Bitmap bitmap) {
-					if (loading) {
-						if (useloading) {
+					if (loading)
+					{
+						if (useloading)
+						{
 							progress.setVisibility(View.INVISIBLE);
 						}
-						file=ApplicationUtil.webImageCache.getFilePath(image.toString());
-						if (bitmap != null && !bitmap.isRecycled()) {
-							imagebitmap=bitmap;
-							if(imagebitmap!=bitmap){
-								bitmap.recycle();
-							}
-							width=imagebitmap.getWidth();
-							height=imagebitmap.getHeight();
+						file = BitmapCache.getInstance().getRealName(image.toString());
+						if (bitmap != null && !bitmap.isRecycled())
+						{
+							width = bitmap.getWidth();
+							height = bitmap.getHeight();
 							imageview.setAdjustViewBounds(false);
-							imageview.setImageBitmap(imagebitmap);
-							if (completeListener != null) {
+							imageview.setImageBitmap(bitmap);
+							if (completeListener != null)
+							{
 								completeListener.onComplete(true);
 							}
 						}
-						else {
+						else
+						{
 							// Set fallback resource
-							if (fallbackResource != null) {
+							if (fallbackResource != null)
+							{
 								imageview.setAdjustViewBounds(false);
 								imageview.setImageResource(fallbackResource);
 							}
-							if (completeListener != null) {
+							if (completeListener != null)
+							{
 								completeListener.onComplete(false);
 							}
 							loading = false;
@@ -177,7 +182,8 @@ public class SmartImageView extends FrameLayout {
 
 				@Override
 				public void onProgress(long current, long total) {
-					if (loading && completeListener != null) {
+					if (loading && completeListener != null)
+					{
 						completeListener.onProgress(current, total);
 					}
 				}
@@ -185,9 +191,11 @@ public class SmartImageView extends FrameLayout {
 
 			// Run the task in a threadpool
 			request = threadPool.submit(currentTask);
-			if (request != null && context != null) {
+			if (request != null && context != null)
+			{
 				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-				if (requestList == null) {
+				if (requestList == null)
+				{
 					requestList = new LinkedList<WeakReference<Future<?>>>();
 					requestMap.put(context, requestList);
 				}
@@ -196,32 +204,36 @@ public class SmartImageView extends FrameLayout {
 			}
 		}
 	}
-	
-	public int[] getImageSize(){
-		return new int[]{width,height};
+
+	public int[] getImageSize() {
+		return new int[]{width, height};
 	}
-	
-	public File getBitmapFile(){
+
+	public File getBitmapFile() {
 		return new File(file);
 	}
 
 	public void recycle() {
 		loading = false;
-		if (request != null) {
+		if (request != null)
+		{
 			request.cancel(true);
-			if (context != null) {
+			if (context != null)
+			{
 				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-				if (requestList != null) {
+				if (requestList != null)
+				{
 					requestList.remove(request);
 				}
 			}
 		}
 		imageview.setVisibility(View.INVISIBLE);
-		if(!imagebitmap.isRecycled()){
+		if (!imagebitmap.isRecycled())
+		{
 			imagebitmap.recycle();
 		}
-		width=0;
-		height=0;
+		width = 0;
+		height = 0;
 	}
 
 	public void cancel() {
@@ -230,10 +242,13 @@ public class SmartImageView extends FrameLayout {
 
 	public static void cancelTasks(Context context, boolean mayInterruptIfRunning) {
 		List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-		if (requestList != null) {
-			for (WeakReference<Future<?>> requestRef : requestList) {
+		if (requestList != null)
+		{
+			for (WeakReference<Future<?>> requestRef : requestList)
+			{
 				Future<?> request = requestRef.get();
-				if (request != null) {
+				if (request != null)
+				{
 					request.cancel(mayInterruptIfRunning);
 				}
 			}

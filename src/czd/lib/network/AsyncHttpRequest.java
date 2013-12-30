@@ -25,53 +25,69 @@ class AsyncHttpRequest implements Runnable {
 		this.context = context;
 		this.request = request;
 		this.responseHandler = responseHandler;
-		if (responseHandler instanceof BinaryHttpResponseHandler || responseHandler instanceof FileHttpResponseHandler) {
+		if (responseHandler instanceof BinaryHttpResponseHandler || responseHandler instanceof FileHttpResponseHandler)
+		{
 			this.isBinaryRequest = true;
 		}
 	}
-	
+
 	@Override
 	public void run() {
-		try {
-			if (responseHandler != null) {
+		try
+		{
+			if (responseHandler != null)
+			{
 				responseHandler.sendStartMessage();
 			}
 
 			makeRequestWithRetries();
 
-			if (responseHandler != null) {
+			if (responseHandler != null)
+			{
 				responseHandler.sendFinishMessage();
 			}
-		} catch (IOException e) {
-			if (responseHandler != null) {
+		} catch (IOException e)
+		{
+			if (responseHandler != null)
+			{
 				responseHandler.sendFinishMessage();
-				if (this.isBinaryRequest) {
-					responseHandler.sendFailureMessage(e, (byte[]) null);
+				if (this.isBinaryRequest)
+				{
+					responseHandler.sendFailureMessage(e, (byte[])null);
 				}
-				else {
-					responseHandler.sendFailureMessage(e, (String) null);
+				else
+				{
+					responseHandler.sendFailureMessage(e, (String)null);
 				}
 			}
 		}
 	}
 
 	private void makeRequest() throws IOException {
-		if (!Thread.currentThread().isInterrupted()) {
-			try {
-				if(responseHandler instanceof FileHttpResponseHandler && ((FileHttpResponseHandler)responseHandler).append){
-					request.setHeader("RANGE", "bytes="+((FileHttpResponseHandler)responseHandler).getSkipSize()+"-");
+		if (!Thread.currentThread().isInterrupted())
+		{
+			try
+			{
+				if (responseHandler instanceof FileHttpResponseHandler && ((FileHttpResponseHandler)responseHandler).append)
+				{
+					request.setHeader("RANGE", "bytes=" + ((FileHttpResponseHandler)responseHandler).getSkipSize() + "-");
 				}
 				HttpResponse response = client.execute(request, context);
-				if (!Thread.currentThread().isInterrupted()) {
-					if (responseHandler != null) {
+				if (!Thread.currentThread().isInterrupted())
+				{
+					if (responseHandler != null)
+					{
 						responseHandler.sendResponseMessage(response);
 					}
 				}
-				else {
+				else
+				{
 					//TODO: should raise InterruptedException? this block is reached whenever the request is cancelled before its response is received
 				}
-			} catch (IOException e) {
-				if (!Thread.currentThread().isInterrupted()) {
+			} catch (IOException e)
+			{
+				if (!Thread.currentThread().isInterrupted())
+				{
 					throw e;
 				}
 			}
@@ -84,30 +100,40 @@ class AsyncHttpRequest implements Runnable {
 		boolean retry = true;
 		IOException cause = null;
 		HttpRequestRetryHandler retryHandler = client.getHttpRequestRetryHandler();
-		while (retry) {
-			try {
+		while (retry)
+		{
+			try
+			{
 				makeRequest();
 				return;
-			} catch (UnknownHostException e) {
-				if (responseHandler != null) {
+			} catch (UnknownHostException e)
+			{
+				if (responseHandler != null)
+				{
 					responseHandler.sendFailureMessage(e, "can't resolve host");
 				}
 				return;
-			} catch (SocketException e) {
+			} catch (SocketException e)
+			{
 				// Added to detect host unreachable
-				if (responseHandler != null) {
+				if (responseHandler != null)
+				{
 					responseHandler.sendFailureMessage(e, "can't resolve host");
 				}
 				return;
-			} catch (SocketTimeoutException e) {
-				if (responseHandler != null) {
+			} catch (SocketTimeoutException e)
+			{
+				if (responseHandler != null)
+				{
 					responseHandler.sendFailureMessage(e, "socket time out");
 				}
 				return;
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				cause = e;
 				retry = retryHandler.retryRequest(cause, ++executionCount, context);
-			} catch (NullPointerException e) {
+			} catch (NullPointerException e)
+			{
 				// there's a bug in HttpClient 4.0.x that on some occasions causes
 				// DefaultRequestExecutor to throw an NPE, see
 				// http://code.google.com/p/android/issues/detail?id=5255
@@ -121,6 +147,6 @@ class AsyncHttpRequest implements Runnable {
 		ex.initCause(cause);
 		throw ex;
 	}
-	
-	
+
+
 }

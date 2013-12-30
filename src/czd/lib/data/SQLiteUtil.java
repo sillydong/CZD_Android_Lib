@@ -3,6 +3,7 @@ package czd.lib.data;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import czd.lib.application.ApplicationUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,8 +15,8 @@ public class SQLiteUtil {
 	private static SQLiteUtil mInstance = new SQLiteUtil();
 
 	/**
-		 *
-		 */
+	 *
+	 */
 	private SQLiteUtil() {
 	}
 
@@ -30,18 +31,26 @@ public class SQLiteUtil {
 	 * open or create a database with the given dbName:
 	 * /data/data/packagename/databases/databasefilename
 	 * /sdcard/databasefilename
-	 * 
+	 *
 	 * @param dbName
+	 *
 	 * @return SQLiteDatabase
 	 */
 	private SQLiteDatabase openDB(String dbName) {
+		if (!dbName.contains("/"))
+		{
+			dbName = ApplicationUtil.application_context.getDatabasePath(dbName).getAbsolutePath();
+		}
 		File file = new File(dbName);
-		if (file.exists() == true) {
+		if (file.exists())
+		{
 			return SQLiteDatabase.openDatabase(dbName, null, SQLiteDatabase.OPEN_READWRITE);
 		}
-		else {
+		else
+		{
 			File datafiledir = new File(file.getParent());
-			if (!datafiledir.exists()) {
+			if (!datafiledir.exists())
+			{
 				datafiledir.mkdirs();
 			}
 			return SQLiteDatabase.openOrCreateDatabase(dbName, null);
@@ -50,7 +59,7 @@ public class SQLiteUtil {
 
 	/**
 	 * close database
-	 * 
+	 *
 	 * @param db
 	 */
 	private void closeDB(SQLiteDatabase db) {
@@ -59,21 +68,19 @@ public class SQLiteUtil {
 
 	/**
 	 * delete database
-	 * 
+	 *
 	 * @param dbName
+	 *
 	 * @return boolean
 	 */
 	public boolean deleteDB(String dbName) {
 		File file = new File(dbName);
-		if (file.exists() == true) {
-			return file.delete();
-		}
-		return true;
+		return !file.exists() || file.delete();
 	}
 
 	/**
 	 * execute sql command
-	 * 
+	 *
 	 * @param dbName
 	 * @param sql
 	 */
@@ -85,10 +92,11 @@ public class SQLiteUtil {
 
 	/**
 	 * execute sql command and return Cursor
-	 * 
+	 *
 	 * @param dbName
 	 * @param tableName
 	 * @param condStr
+	 *
 	 * @return Cursor
 	 */
 	public Cursor openQuery(String dbName, String sql) {
@@ -104,7 +112,7 @@ public class SQLiteUtil {
 		Cursor cursor = db.query(tableName, null, condStr, null, null, null, null);
 		cursor.moveToFirst();
 		closeDB(db);
-		return (cursor);
+		return cursor;
 	}
 
 	public int getRowsCount(Cursor cursor) {
@@ -151,20 +159,24 @@ public class SQLiteUtil {
 	}
 
 	public static void copyDb(Context context, String dbName, int resourceId) {
-		try {
+		try
+		{
 			String databaseFilename = context.getDatabasePath(dbName).getPath();
-			if (!(new File(databaseFilename)).exists()) {
+			if (!(new File(databaseFilename)).exists())
+			{
 				InputStream is = context.getResources().openRawResource(resourceId);
 				FileOutputStream fos = new FileOutputStream(databaseFilename);
 				byte[] buffer = new byte[8192];
 				int count = 0;
-				while ((count = is.read(buffer)) > 0) {
+				while ((count = is.read(buffer)) > 0)
+				{
 					fos.write(buffer, 0, count);
 				}
 				fos.close();
 				is.close();
 			}
-		} catch (Exception e) {
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 	}

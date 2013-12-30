@@ -84,10 +84,10 @@ public class PullScrollView extends ScrollView {
 		init(context, null);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void init(Context context, AttributeSet attrs) {
 		this._context = context;
-		if (attrs != null) {
+		if (attrs != null)
+		{
 			TypedArray tattrs = this._context.obtainStyledAttributes(attrs, R.styleable.PullView);
 			this._headerStatePull = tattrs.getString(0);
 			this._headerStateRelease = tattrs.getString(1);
@@ -98,11 +98,11 @@ public class PullScrollView extends ScrollView {
 			this._headerInfoVisible = tattrs.getInt(6, View.VISIBLE);
 			tattrs.recycle();
 		}
-		this.header = (LinearLayout) ViewUtil.viewById(this._context, R.layout.common_pull_header);
-		this.header_iv = (ImageView) this.header.findViewById(R.id.common_pull_header_image);
-		this.header_pb = (ProgressBar) this.header.findViewById(R.id.common_pull_header_progress);
-		this.header_stv = (TextView) this.header.findViewById(R.id.common_pull_header_state);
-		this.header_itv = (TextView) this.header.findViewById(R.id.common_pull_header_info);
+		this.header = (LinearLayout)ViewUtil.viewById(this._context, R.layout.common_pull_header);
+		this.header_iv = (ImageView)this.header.findViewById(R.id.common_pull_header_image);
+		this.header_pb = (ProgressBar)this.header.findViewById(R.id.common_pull_header_progress);
+		this.header_stv = (TextView)this.header.findViewById(R.id.common_pull_header_state);
+		this.header_itv = (TextView)this.header.findViewById(R.id.common_pull_header_info);
 		this.header.setBackgroundDrawable(this._headerBackground);
 		this.header_iv.setVisibility(View.VISIBLE);
 		this.header_pb.setVisibility(View.VISIBLE);
@@ -141,10 +141,13 @@ public class PullScrollView extends ScrollView {
 
 	@Override
 	public final boolean onInterceptTouchEvent(MotionEvent event) {
-		if (refreshable) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (state != STATE_REFRESHING && t == 0) {
-					startY = (int) event.getY();
+		if (refreshable)
+		{
+			if (event.getAction() == MotionEvent.ACTION_DOWN)
+			{
+				if (state != STATE_REFRESHING && t == 0)
+				{
+					startY = (int)event.getY();
 				}
 			}
 		}
@@ -153,79 +156,93 @@ public class PullScrollView extends ScrollView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (refreshable) {
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_UP:
-				if (startY != 0) {
-					if (state != STATE_REFRESHING) {
-						switch (state) {
-						case STATE_PULLTOREFRESH:
-							state = STATE_DONE;
-							resetHeader();
-							break;
-						case STATE_RELEASETOREFRESH:
-							state = STATE_REFRESHING;
-							resetHeader();
-							onRefresh();
-							break;
-						default:
-							break;
+		if (refreshable)
+		{
+			switch (event.getAction())
+			{
+				case MotionEvent.ACTION_UP:
+					if (startY != 0)
+					{
+						if (state != STATE_REFRESHING)
+						{
+							switch (state)
+							{
+								case STATE_PULLTOREFRESH:
+									state = STATE_DONE;
+									resetHeader();
+									break;
+								case STATE_RELEASETOREFRESH:
+									state = STATE_REFRESHING;
+									resetHeader();
+									onRefresh();
+									break;
+								default:
+									break;
+							}
+						}
+						isback = false;
+						startY = 0;
+					}
+					pulling = false;
+					break;
+				case MotionEvent.ACTION_MOVE:
+					onStop = false;
+					if (state != STATE_REFRESHING && t == 0 && startY > 0)
+					{
+						int tmpY = (int)event.getY();
+						switch (state)
+						{
+							case STATE_RELEASETOREFRESH:
+								pulling = true;
+								scrollTo(0, 0);
+								if (tmpY < startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO < header_height)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+								}
+								break;
+							case STATE_PULLTOREFRESH:
+								pulling = true;
+								scrollTo(0, 0);
+								if (tmpY <= startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO >= header_height)
+								{
+									state = STATE_RELEASETOREFRESH;
+									isback = true;
+									resetHeader();
+								}
+								break;
+							case STATE_DONE:
+								if (tmpY >= startY)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+									pulling = true;
+								}
+								else
+								{
+									startY = 0;
+								}
+							default:
+								break;
+						}
+						if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH))
+						{
+							header.setPadding(0, (tmpY - startY) / RATIO - header_height, 0, 0);
 						}
 					}
-					isback = false;
-					startY = 0;
-				}
-				pulling = false;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				onStop = false;
-				if (state != STATE_REFRESHING && t == 0 && startY > 0) {
-					int tmpY = (int) event.getY();
-					switch (state) {
-					case STATE_RELEASETOREFRESH:
-						pulling = true;
-						scrollTo(0, 0);
-						if (tmpY < startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO < header_height) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-						}
-						break;
-					case STATE_PULLTOREFRESH:
-						pulling = true;
-						scrollTo(0, 0);
-						if (tmpY <= startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO >= header_height) {
-							state = STATE_RELEASETOREFRESH;
-							isback = true;
-							resetHeader();
-						}
-						break;
-					case STATE_DONE:
-						if (tmpY >= startY) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-							pulling = true;
-						}
-						else{
-							startY=0;
-						}
-					default:
-						break;
-					}
-					if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH)) {
-						header.setPadding(0, (tmpY - startY) / RATIO - header_height, 0, 0);
-					}
-				}
-				break;
-			default:
-				break;
+					break;
+				default:
+					break;
 			}
 		}
 		return super.onTouchEvent(event);
@@ -239,14 +256,16 @@ public class PullScrollView extends ScrollView {
 	}
 
 	private void onRefresh() {
-		if (listener != null) {
+		if (listener != null)
+		{
 			listener.onRefresh();
 		}
 	}
 
 	public void setInfo(String text) {
 		this.header_itv.setText(text);
-		if (this.header_itv.getVisibility() != View.VISIBLE) {
+		if (this.header_itv.getVisibility() != View.VISIBLE)
+		{
 			this.header_itv.setVisibility(View.VISIBLE);
 		}
 	}
@@ -256,80 +275,90 @@ public class PullScrollView extends ScrollView {
 	}
 
 	private void resetHeader() {
-		switch (state) {
-		case STATE_DONE:
-			this.header_stv.setText(_headerStateDone);
-			this.header.setPadding(0, -1 * header_height, 0, 0);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.VISIBLE);
-			break;
-		case STATE_PULLTOREFRESH:
-			this.header_stv.setText(_headerStatePull);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
-			if (isback) {
-				isback = false;
+		switch (state)
+		{
+			case STATE_DONE:
+				this.header_stv.setText(_headerStateDone);
+				this.header.setPadding(0, -1 * header_height, 0, 0);
+				this.header_pb.setVisibility(View.GONE);
 				this.header_iv.clearAnimation();
-				this.header_iv.startAnimation(anim_down);
-			}
-			break;
-		case STATE_RELEASETOREFRESH:
-			this.header_stv.setText(_headerStateRelease);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				break;
+			case STATE_PULLTOREFRESH:
+				this.header_stv.setText(_headerStatePull);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				if (isback)
+				{
+					isback = false;
+					this.header_iv.clearAnimation();
+					this.header_iv.startAnimation(anim_down);
+				}
+				break;
+			case STATE_RELEASETOREFRESH:
+				this.header_stv.setText(_headerStateRelease);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
 
-			this.header_iv.clearAnimation();
-			this.header_iv.startAnimation(anim_up);
-			break;
-		case STATE_REFRESHING:
-			this.header.setPadding(0, 0, 0, 0);
-			this.header_stv.setText(_headerStateLoading);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.GONE);
-			this.header_pb.setVisibility(View.VISIBLE);
-			break;
-		default:
-			break;
+				this.header_iv.clearAnimation();
+				this.header_iv.startAnimation(anim_up);
+				break;
+			case STATE_REFRESHING:
+				this.header.setPadding(0, 0, 0, 0);
+				this.header_stv.setText(_headerStateLoading);
+				this.header_iv.clearAnimation();
+				this.header_iv.setVisibility(View.GONE);
+				this.header_pb.setVisibility(View.VISIBLE);
+				break;
+			default:
+				break;
 		}
 	}
 
 	@Override
 	public void addView(View child, int index, android.view.ViewGroup.LayoutParams params) {
-		if (this.container == null) {
+		if (this.container == null)
+		{
 			super.addView(child, index, params);
 		}
-		else {
+		else
+		{
 			this.container.addView(child, index, params);
 		}
 	}
 
 	@Override
 	public void addView(View child, int index) {
-		if (this.container == null) {
+		if (this.container == null)
+		{
 			super.addView(child, index);
 		}
-		else {
+		else
+		{
 			this.container.addView(child, index);
 		}
 	}
 
 	@Override
 	public void addView(View child, android.view.ViewGroup.LayoutParams params) {
-		if (this.container == null) {
+		if (this.container == null)
+		{
 			super.addView(child, params);
 		}
-		else {
+		else
+		{
 			this.container.addView(child, params);
 		}
 	}
 
 	@Override
 	public void addView(View child) {
-		if (this.container == null) {
+		if (this.container == null)
+		{
 			super.addView(child);
 		}
-		else {
+		else
+		{
 			this.container.addView(child);
 		}
 	}
@@ -338,10 +367,12 @@ public class PullScrollView extends ScrollView {
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
 		this.t = t;
-		if (pulling) {
+		if (pulling)
+		{
 			scrollTo(0, 0);
 		}
-		if (listener != null) {
+		if (listener != null)
+		{
 			listener.onScroll(this, l, t, oldl, oldt);
 		}
 		handler.sendMessageDelayed(handler.obtainMessage(0, t, oldt), 100);
@@ -350,26 +381,34 @@ public class PullScrollView extends ScrollView {
 	}
 
 	private void whereami(int t) {
-		if (t <= advance_gap) {
-			if (!onTop && listener != null) {
+		if (t <= advance_gap)
+		{
+			if (!onTop && listener != null)
+			{
 				onTop = true;
 				listener.onTop(t);
 			}
 		}
-		else {
-			if (onTop && listener != null) {
+		else
+		{
+			if (onTop && listener != null)
+			{
 				onTop = false;
 				listener.outTop(t);
 			}
 		}
-		if (tall - t - height <= advance_gap) {
-			if (!onBottom && listener != null) {
+		if (tall - t - height <= advance_gap)
+		{
+			if (!onBottom && listener != null)
+			{
 				onBottom = true;
 				listener.onBottom(t);
 			}
 		}
-		else {
-			if (onBottom && listener != null) {
+		else
+		{
+			if (onBottom && listener != null)
+			{
 				onBottom = false;
 				listener.outBottom(t);
 			}
@@ -387,11 +426,13 @@ public class PullScrollView extends ScrollView {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
-		if (height == 0) {
+		if (height == 0)
+		{
 			height = getHeight();
 			advance_gap = Math.min(advance_gap, height / 5);
 		}
-		else {
+		else
+		{
 			tall = getChildAt(0).getHeight();
 			whereami(lastY);
 		}
@@ -413,10 +454,13 @@ public class PullScrollView extends ScrollView {
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
 			PullScrollView scroll = scroll_weak.get();
-			if (scroll != null) {
-				if (!scroll.onStop && msg.arg1 == scroll.lastY) {
+			if (scroll != null)
+			{
+				if (!scroll.onStop && msg.arg1 == scroll.lastY)
+				{
 					scroll.onStop = true;
-					if (scroll.listener != null) {
+					if (scroll.listener != null)
+					{
 						scroll.listener.onStop(msg.arg1);
 					}
 				}

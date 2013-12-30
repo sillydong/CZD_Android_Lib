@@ -12,7 +12,7 @@ import java.util.Map;
 public class PreferenceUtil {
 	/**
 	 * write String into SharedPreference named by the given name
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 * @param towrite
@@ -26,7 +26,7 @@ public class PreferenceUtil {
 
 	/**
 	 * write int into SharedPreference named by the given name
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 * @param tag
@@ -48,7 +48,7 @@ public class PreferenceUtil {
 
 	/**
 	 * write int into SharedPreference named by the given name
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 * @param tag
@@ -63,7 +63,7 @@ public class PreferenceUtil {
 
 	/**
 	 * write bundle data into SharedPreference named by the given name
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 * @param strtowrite
@@ -71,7 +71,8 @@ public class PreferenceUtil {
 	public static void writeBundlePreference(Context context, String name, Bundle strtowrite) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
 		Editor edit = sp.edit();
-		for (String key : strtowrite.keySet()) {
+		for (String key : strtowrite.keySet())
+		{
 			edit.putString(key, strtowrite.getString(key));
 		}
 		edit.commit();
@@ -80,7 +81,8 @@ public class PreferenceUtil {
 	public static void writeNameValuePairPreference(Context context, String name, ArrayList<NameValuePair> nameValuePairs) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
 		Editor edit = sp.edit();
-		for (NameValuePair nameValuePair : nameValuePairs) {
+		for (NameValuePair nameValuePair : nameValuePairs)
+		{
 			edit.putString(nameValuePair.getName(), nameValuePair.getValue());
 		}
 		edit.commit();
@@ -88,13 +90,14 @@ public class PreferenceUtil {
 
 	/**
 	 * clean the named SharedPreference
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 */
 	public static void cleanPreference(Context context, String name) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-		if (sp != null) {
+		if (sp != null)
+		{
 			Editor edit = sp.edit();
 			edit.clear();
 			edit.commit();
@@ -103,22 +106,24 @@ public class PreferenceUtil {
 
 	/**
 	 * get SharedPreferences by name
-	 * 
+	 *
 	 * @param context
 	 * @param name
+	 *
 	 * @return Map<String,?>
 	 */
-	public static Map<String, ?> getMapPreference(Context context, String name) {
+	public static Map<String,?> getMapPreference(Context context, String name) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
 		return sp.getAll();
 	}
 
 	/**
 	 * get String data from SharedPreferences
-	 * 
+	 *
 	 * @param context
 	 * @param name
 	 * @param tag
+	 *
 	 * @return
 	 */
 	public static String getStringPreference(Context context, String name, String tag) {
@@ -130,6 +135,7 @@ public class PreferenceUtil {
 	 * @param context
 	 * @param name
 	 * @param tag
+	 *
 	 * @return
 	 */
 	public static int getIntPreference(Context context, String name, String tag) {
@@ -141,6 +147,7 @@ public class PreferenceUtil {
 	 * @param context
 	 * @param name
 	 * @param tag
+	 *
 	 * @return
 	 */
 	public static boolean getBooleanPreference(Context context, String name, String tag, boolean defValue) {

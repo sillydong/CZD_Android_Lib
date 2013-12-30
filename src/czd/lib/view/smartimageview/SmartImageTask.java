@@ -17,20 +17,26 @@ public class SmartImageTask implements Runnable {
 	public static class OnCompleteHandler extends Handler {
 		@Override
 		public void handleMessage(Message msg) {
-			if (msg.what == BITMAP_READY) {
-				onComplete((Bitmap) msg.obj);
+			if (msg.what == BITMAP_READY)
+			{
+				onComplete((Bitmap)msg.obj);
 			}
-			else if (msg.what == BITMAP_LOADING) {
-				Object[] data = (Object[]) msg.obj;
-				onProgress(((Long) data[0]).longValue(), ((Long) data[1]).longValue());
+			else if (msg.what == BITMAP_LOADING)
+			{
+				Object[] data = (Object[])msg.obj;
+				onProgress(((Long)data[0]).longValue(), ((Long)data[1]).longValue());
 			}
 		}
 
 		public void onComplete(Bitmap bitmap) {
-		};
+		}
+
+		;
 
 		public void onProgress(long current, long total) {
-		};
+		}
+
+		;
 	}
 
 	public abstract static class OnCompleteListener {
@@ -53,16 +59,21 @@ public class SmartImageTask implements Runnable {
 
 	@Override
 	public void run() {
-		if (!Thread.currentThread().isInterrupted() && image != null) {
-			if (image instanceof WebImage && onCompleteHandler != null) {
-				if (width != 0 && height != 0) {
-					complete(((WebImage) image).getBitmap(context, width, height, onCompleteHandler));
+		if (!Thread.currentThread().isInterrupted() && image != null)
+		{
+			if (image instanceof WebImage && onCompleteHandler != null)
+			{
+				if (width != 0 && height != 0)
+				{
+					complete(((WebImage)image).getBitmap(context, width, height, onCompleteHandler));
 				}
-				else {
-					complete(((WebImage) image).getBitmap(context, onCompleteHandler));
+				else
+				{
+					complete(((WebImage)image).getBitmap(context, onCompleteHandler));
 				}
 			}
-			else {
+			else
+			{
 				complete(image.getBitmap(context));
 			}
 		}
@@ -73,13 +84,15 @@ public class SmartImageTask implements Runnable {
 	}
 
 	public void cancel() {
-		if (!Thread.currentThread().isInterrupted()) {
+		if (!Thread.currentThread().isInterrupted())
+		{
 			Thread.currentThread().interrupt();
 		}
 	}
 
 	public void complete(Bitmap bitmap) {
-		if (onCompleteHandler != null && !Thread.currentThread().isInterrupted()) {
+		if (onCompleteHandler != null && !Thread.currentThread().isInterrupted())
+		{
 			onCompleteHandler.sendMessage(onCompleteHandler.obtainMessage(BITMAP_READY, bitmap));
 		}
 	}

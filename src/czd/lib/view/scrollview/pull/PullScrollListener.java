@@ -1,19 +1,7 @@
 package czd.lib.view.scrollview.pull;
 
-import android.widget.ScrollView;
+import czd.lib.view.absinterface.PositionListener;
 
-public interface PullScrollListener {
+public interface PullScrollListener extends PositionListener {
 	public void onRefresh();
-
-	public void onScroll(ScrollView view, int l, int t, int oldl, int oldt);
-
-	public void onTop(int t);
-
-	public void outTop(int t);
-
-	public void onBottom(int t);
-
-	public void outBottom(int t);
-
-	public void onStop(int position);
 }

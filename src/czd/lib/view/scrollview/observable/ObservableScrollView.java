@@ -34,7 +34,8 @@ public class ObservableScrollView extends ScrollView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
-		if (ev.getAction() == MotionEvent.ACTION_MOVE) {
+		if (ev.getAction() == MotionEvent.ACTION_MOVE)
+		{
 			onStop = false;
 		}
 		return super.onTouchEvent(ev);
@@ -43,7 +44,8 @@ public class ObservableScrollView extends ScrollView {
 	@Override
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
-		if (listener != null) {
+		if (listener != null)
+		{
 			listener.onScroll(this, l, t, oldl, oldt);
 		}
 		handler.sendMessageDelayed(handler.obtainMessage(0, t, oldt), 100);
@@ -52,26 +54,34 @@ public class ObservableScrollView extends ScrollView {
 	}
 
 	private void whereami(int t) {
-		if (t <= advance_gap) {
-			if (!onTop && listener != null) {
+		if (t <= advance_gap)
+		{
+			if (!onTop && listener != null)
+			{
 				onTop = true;
 				listener.onTop(t);
 			}
 		}
-		else {
-			if (onTop && listener != null) {
+		else
+		{
+			if (onTop && listener != null)
+			{
 				onTop = false;
 				listener.outTop(t);
 			}
 		}
-		if (tall - t - height <= advance_gap) {
-			if (!onBottom && listener != null) {
+		if (tall - t - height <= advance_gap)
+		{
+			if (!onBottom && listener != null)
+			{
 				onBottom = true;
 				listener.onBottom(t);
 			}
 		}
-		else {
-			if (onBottom && listener != null) {
+		else
+		{
+			if (onBottom && listener != null)
+			{
 				onBottom = false;
 				listener.outBottom(t);
 			}
@@ -89,11 +99,13 @@ public class ObservableScrollView extends ScrollView {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
-		if (height == 0) {
+		if (height == 0)
+		{
 			height = getHeight();
 			advance_gap = Math.min(advance_gap, height / 5);
 		}
-		else {
+		else
+		{
 			tall = getChildAt(0).getHeight();
 			whereami(lastY);
 		}
@@ -114,10 +126,13 @@ public class ObservableScrollView extends ScrollView {
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
 			ObservableScrollView scroll = scroll_weak.get();
-			if (scroll != null) {
-				if (!scroll.onStop && msg.arg1 == scroll.lastY) {
+			if (scroll != null)
+			{
+				if (!scroll.onStop && msg.arg1 == scroll.lastY)
+				{
 					scroll.onStop = true;
-					if (scroll.listener != null) {
+					if (scroll.listener != null)
+					{
 						scroll.listener.onStop(msg.arg1);
 					}
 				}

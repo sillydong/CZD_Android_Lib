@@ -10,8 +10,9 @@ import java.util.regex.Pattern;
 public class ValidateUtil {
 	/**
 	 * 判断字符串是否为合法Email地址
-	 * 
+	 *
 	 * @param email
+	 *
 	 * @return boolean
 	 */
 	public static boolean isEmail(String email) {
@@ -21,8 +22,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为中文字符
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isChinese(String str) {
@@ -31,8 +33,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为NULL或空
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isBlank(String str) {
@@ -41,12 +44,14 @@ public class ValidateUtil {
 
 	/**
 	 * 判断整数是否为质数
-	 * 
+	 *
 	 * @param x
+	 *
 	 * @return boolean
 	 */
 	public static boolean isPrime(int x) {
-		if (x <= 7) {
+		if (x <= 7)
+		{
 			if (x == 2 || x == 3 || x == 5 || x == 7)
 				return true;
 		}
@@ -57,37 +62,46 @@ public class ValidateUtil {
 			return false;
 		if (x % 5 == 0)
 			return false;
-		int end = (int) Math.sqrt(x);
-		while (c <= end) {
-			if (x % c == 0) {
+		int end = (int)Math.sqrt(x);
+		while (c <= end)
+		{
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 4;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 2;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 4;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 2;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 4;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 6;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 2;
-			if (x % c == 0) {
+			if (x % c == 0)
+			{
 				return false;
 			}
 			c += 6;
@@ -97,8 +111,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为包含".a-zA-Z_0-9-!@#$%^&*()"字符的5到18位密码
-	 * 
+	 *
 	 * @param password
+	 *
 	 * @return boolean
 	 */
 	public static boolean isPassword(String password) {
@@ -108,8 +123,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为整数
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isNumber(String str) {
@@ -118,8 +134,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为浮点，包括double和float
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isDouble(String str) {
@@ -128,12 +145,14 @@ public class ValidateUtil {
 
 	/**
 	 * 判断是否为合法字符
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isLetter(String str) {
-		if (str == null || str.length() < 0) {
+		if (str == null || str.length() < 0)
+		{
 			return false;
 		}
 		return Pattern.compile("[\\w\\.-_]*").matcher(str).matches();
@@ -141,8 +160,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为32为MD5加密结果
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return
 	 */
 	public static boolean isMD5(String str) {
@@ -151,8 +171,9 @@ public class ValidateUtil {
 
 	/**
 	 * 判断字符串是否为SH1加密结果
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return boolean
 	 */
 	public static boolean isSH1(String str) {
@@ -161,6 +182,7 @@ public class ValidateUtil {
 
 	/**
 	 * @param str
+	 *
 	 * @return
 	 */
 	public static boolean isAddress(String str) {
@@ -173,8 +195,9 @@ public class ValidateUtil {
 
 	/**
 	 * test the string is validate phone number
-	 * 
+	 *
 	 * @param str
+	 *
 	 * @return
 	 */
 	public static boolean isPhoneNumber(String str) {
@@ -203,20 +226,24 @@ public class ValidateUtil {
 	}
 
 	public static boolean isJSONString(String data) {
-		if (data != null) {
-			try {
+		if (data != null)
+		{
+			try
+			{
 				Object data_o = new JSONTokener(data).nextValue();
-				if (data_o instanceof JSONObject || data_o instanceof JSONArray) {
+				if (data_o instanceof JSONObject || data_o instanceof JSONArray)
+				{
 					return true;
 				}
-			} catch (JSONException e) {
+			} catch (JSONException e)
+			{
 				return false;
 			}
 		}
 		return false;
 	}
-	
-	public static boolean isNormalChineseContent(String data){
+
+	public static boolean isNormalChineseContent(String data) {
 		return Pattern.compile("^[\\w \\p{P}]+$").matcher(data).matches();
 	}
 }

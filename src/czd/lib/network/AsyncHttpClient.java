@@ -49,8 +49,8 @@ public class AsyncHttpClient {
 	private final DefaultHttpClient httpClient;
 	private final HttpContext httpContext;
 	private ThreadPoolExecutor threadPool;
-	private final Map<Context, List<WeakReference<Future<?>>>> requestMap;
-	private final Map<String, String> clientHeaderMap;
+	private final Map<Context,List<WeakReference<Future<?>>>> requestMap;
+	private final Map<String,String> clientHeaderMap;
 
 	/**
 	 * Creates a new AsyncHttpClient.
@@ -74,17 +74,19 @@ public class AsyncHttpClient {
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 		ThreadSafeClientConnManager cm = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
-		
+
 		httpParams.setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
 
 		httpContext = new SyncBasicHttpContext(new BasicHttpContext());
 		httpClient = new DefaultHttpClient(cm, httpParams);
 		httpClient.addRequestInterceptor(new HttpRequestInterceptor() {
 			public void process(HttpRequest request, HttpContext context) {
-				if (!request.containsHeader(HEADER_ACCEPT_ENCODING)) {
+				if (!request.containsHeader(HEADER_ACCEPT_ENCODING))
+				{
 					request.addHeader(HEADER_ACCEPT_ENCODING, ENCODING_GZIP);
 				}
-				for (String header : clientHeaderMap.keySet()) {
+				for (String header : clientHeaderMap.keySet())
+				{
 					request.addHeader(header, clientHeaderMap.get(header));
 				}
 			}
@@ -93,13 +95,17 @@ public class AsyncHttpClient {
 		httpClient.addResponseInterceptor(new HttpResponseInterceptor() {
 			public void process(HttpResponse response, HttpContext context) {
 				final HttpEntity entity = response.getEntity();
-				if (entity == null) {
+				if (entity == null)
+				{
 					return;
 				}
 				final Header encoding = entity.getContentEncoding();
-				if (encoding != null) {
-					for (HeaderElement element : encoding.getElements()) {
-						if (element.getName().equalsIgnoreCase(ENCODING_GZIP)) {
+				if (encoding != null)
+				{
+					for (HeaderElement element : encoding.getElements())
+					{
+						if (element.getName().equalsIgnoreCase(ENCODING_GZIP))
+						{
 							response.setEntity(new InflatingEntity(response.getEntity()));
 							break;
 						}
@@ -110,10 +116,10 @@ public class AsyncHttpClient {
 
 		httpClient.setHttpRequestRetryHandler(new RetryHandler(DEFAULT_MAX_RETRIES));
 
-		threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+		threadPool = (ThreadPoolExecutor)Executors.newCachedThreadPool();
 
-		requestMap = new WeakHashMap<Context, List<WeakReference<Future<?>>>>();
-		clientHeaderMap = new HashMap<String, String>();
+		requestMap = new WeakHashMap<Context,List<WeakReference<Future<?>>>>();
+		clientHeaderMap = new HashMap<String,String>();
 	}
 
 	public HttpClient getHttpClient() {
@@ -163,10 +169,13 @@ public class AsyncHttpClient {
 
 	public void cancelRequests(Context context, boolean mayInterruptIfRunning) {
 		List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-		if (requestList != null) {
-			for (WeakReference<Future<?>> requestRef : requestList) {
+		if (requestList != null)
+		{
+			for (WeakReference<Future<?>> requestRef : requestList)
+			{
 				Future<?> request = requestRef.get();
-				if (request != null) {
+				if (request != null)
+				{
 					request.cancel(mayInterruptIfRunning);
 				}
 			}
@@ -177,7 +186,7 @@ public class AsyncHttpClient {
 	public void cancelAllRequests() {
 		requestMap.clear();
 		threadPool.shutdown();
-		threadPool = (ThreadPoolExecutor) Executors.newCachedThreadPool();
+		threadPool = (ThreadPoolExecutor)Executors.newCachedThreadPool();
 	}
 
 	public void get(String url, AsyncHttpResponseHandler responseHandler) {
@@ -212,9 +221,11 @@ public class AsyncHttpClient {
 	}
 
 	public void post(Context context, String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-		try {
+		try
+		{
 			post(context, url, paramsToEntity(params, responseHandler), null, responseHandler);
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			responseHandler.sendFailureMessage(e, "post set responseHandler fail");
 		}
 	}
@@ -225,10 +236,13 @@ public class AsyncHttpClient {
 
 	public void post(Context context, String url, Header[] headers, RequestParams params, String contentType, AsyncHttpResponseHandler responseHandler) {
 		HttpEntityEnclosingRequestBase request = new HttpPost(url);
-		if (params != null) {
-			try {
+		if (params != null)
+		{
+			try
+			{
 				request.setEntity(paramsToEntity(params, responseHandler));
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				responseHandler.sendFailureMessage(e, "Fail set responseHandler");
 			}
 		}
@@ -253,9 +267,11 @@ public class AsyncHttpClient {
 	}
 
 	public void put(Context context, String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
-		try {
+		try
+		{
 			put(context, url, paramsToEntity(params, responseHandler), null, responseHandler);
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			responseHandler.sendFailureMessage(e, "Fail set responseHandler");
 		}
 	}
@@ -288,16 +304,19 @@ public class AsyncHttpClient {
 	}
 
 	protected void sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, AsyncHttpResponseHandler responseHandler, Context context) {
-		if (contentType != null) {
+		if (contentType != null)
+		{
 			uriRequest.addHeader("Content-Type", contentType);
 		}
 
 		Future<?> request = threadPool.submit(new AsyncHttpRequest(client, httpContext, uriRequest, responseHandler));
 
-		if (context != null) {
+		if (context != null)
+		{
 			// Add request to request map
 			List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-			if (requestList == null) {
+			if (requestList == null)
+			{
 				requestList = new LinkedList<WeakReference<Future<?>>>();
 				requestMap.put(context, requestList);
 			}
@@ -309,12 +328,15 @@ public class AsyncHttpClient {
 	}
 
 	public static String getUrlWithQueryString(String url, RequestParams params) {
-		if (params != null) {
+		if (params != null)
+		{
 			String paramString = params.getParamString();
-			if (url.indexOf("?") == -1) {
+			if (url.indexOf("?") == -1)
+			{
 				url += "?" + paramString;
 			}
-			else {
+			else
+			{
 				url += "&" + paramString;
 			}
 		}
@@ -325,7 +347,8 @@ public class AsyncHttpClient {
 	private HttpEntity paramsToEntity(RequestParams params, AsyncHttpResponseHandler responseHandler) throws IOException {
 		HttpEntity entity = null;
 
-		if (params != null) {
+		if (params != null)
+		{
 			entity = params.getEntity(responseHandler);
 		}
 
@@ -333,7 +356,8 @@ public class AsyncHttpClient {
 	}
 
 	private HttpEntityEnclosingRequestBase addEntityToRequestBase(HttpEntityEnclosingRequestBase requestBase, HttpEntity entity) {
-		if (entity != null) {
+		if (entity != null)
+		{
 			requestBase.setEntity(entity);
 		}
 

@@ -15,7 +15,9 @@ public abstract class SyncHttpClient extends AsyncHttpClient {
 		void sendResponseMessage(org.apache.http.HttpResponse response) {
 			responseCode = response.getStatusLine().getStatusCode();
 			super.sendResponseMessage(response);
-		};
+		}
+
+		;
 
 		@Override
 		protected void sendMessage(Message msg) {
@@ -43,7 +45,8 @@ public abstract class SyncHttpClient extends AsyncHttpClient {
 
 	// Private stuff
 	protected void sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, AsyncHttpResponseHandler responseHandler, Context context) {
-		if (contentType != null) {
+		if (contentType != null)
+		{
 			uriRequest.addHeader("Content-Type", contentType);
 		}
 

@@ -69,10 +69,13 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 
 	@Override
 	public final boolean onInterceptTouchEvent(MotionEvent event) {
-		if (refreshable) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (state != STATE_REFRESHING && t == 0) {
-					startY = (int) event.getY();
+		if (refreshable)
+		{
+			if (event.getAction() == MotionEvent.ACTION_DOWN)
+			{
+				if (state != STATE_REFRESHING && t == 0)
+				{
+					startY = (int)event.getY();
 				}
 			}
 		}
@@ -81,78 +84,92 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		if (refreshable) {
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_UP:
-				if (startY != 0) {
-					if (state != STATE_REFRESHING) {
-						switch (state) {
-						case STATE_PULLTOREFRESH:
-							state = STATE_DONE;
-							resetHeader();
-							break;
-						case STATE_RELEASETOREFRESH:
-							state = STATE_REFRESHING;
-							resetHeader();
-							onRefresh();
-							break;
-						default:
-							break;
+		if (refreshable)
+		{
+			switch (event.getAction())
+			{
+				case MotionEvent.ACTION_UP:
+					if (startY != 0)
+					{
+						if (state != STATE_REFRESHING)
+						{
+							switch (state)
+							{
+								case STATE_PULLTOREFRESH:
+									state = STATE_DONE;
+									resetHeader();
+									break;
+								case STATE_RELEASETOREFRESH:
+									state = STATE_REFRESHING;
+									resetHeader();
+									onRefresh();
+									break;
+								default:
+									break;
+							}
+						}
+						isback = false;
+						startY = 0;
+					}
+					pulling = false;
+					break;
+				case MotionEvent.ACTION_MOVE:
+					if (state != STATE_REFRESHING && t == 0 && startY > 0)
+					{
+						int tmpY = (int)event.getY();
+						switch (state)
+						{
+							case STATE_RELEASETOREFRESH:
+								pulling = true;
+								scrollTo(0, 0);
+								if (tmpY < startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO < pull_header_height)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+								}
+								break;
+							case STATE_PULLTOREFRESH:
+								pulling = true;
+								scrollTo(0, 0);
+								if (tmpY <= startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO >= pull_header_height)
+								{
+									state = STATE_RELEASETOREFRESH;
+									isback = true;
+									resetHeader();
+								}
+								break;
+							case STATE_DONE:
+								if (tmpY > startY)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+									pulling = true;
+								}
+								else
+								{
+									startY = 0;
+								}
+							default:
+								break;
+						}
+						if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH))
+						{
+							header.setPadding(0, (tmpY - startY) / RATIO - pull_header_height, 0, 0);
 						}
 					}
-					isback = false;
-					startY = 0;
-				}
-				pulling = false;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				if (state != STATE_REFRESHING && t == 0 && startY > 0) {
-					int tmpY = (int) event.getY();
-					switch (state) {
-					case STATE_RELEASETOREFRESH:
-						pulling = true;
-						scrollTo(0, 0);
-						if (tmpY < startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO < pull_header_height) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-						}
-						break;
-					case STATE_PULLTOREFRESH:
-						pulling = true;
-						scrollTo(0, 0);
-						if (tmpY <= startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO >= pull_header_height) {
-							state = STATE_RELEASETOREFRESH;
-							isback = true;
-							resetHeader();
-						}
-						break;
-					case STATE_DONE:
-						if (tmpY > startY) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-							pulling = true;
-						}
-						else {
-							startY = 0;
-						}
-					default:
-						break;
-					}
-					if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH)) {
-						header.setPadding(0, (tmpY - startY) / RATIO - pull_header_height, 0, 0);
-					}
-				}
-				break;
-			default:
-				break;
+					break;
+				default:
+					break;
 			}
 		}
 		return super.onTouchEvent(event);
@@ -160,7 +177,8 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 
 	@SuppressWarnings("deprecation")
 	private void preInit(Context context, AttributeSet attrs) {
-		if (attrs != null) {
+		if (attrs != null)
+		{
 			TypedArray tattrs = this.context.obtainStyledAttributes(attrs, R.styleable.PullView);
 			this._headerStatePull = tattrs.getString(0);
 			this._headerStateRelease = tattrs.getString(1);
@@ -171,11 +189,11 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 			this._headerInfoVisible = tattrs.getInt(6, View.VISIBLE);
 			tattrs.recycle();
 		}
-		header = (LinearLayout) ViewUtil.viewById(this.context, R.layout.common_pull_header);
-		header_iv = (ImageView) this.header.findViewById(R.id.common_pull_header_image);
-		header_pb = (ProgressBar) this.header.findViewById(R.id.common_pull_header_progress);
-		header_stv = (TextView) this.header.findViewById(R.id.common_pull_header_state);
-		header_itv = (TextView) this.header.findViewById(R.id.common_pull_header_info);
+		header = (LinearLayout)ViewUtil.viewById(this.context, R.layout.common_pull_header);
+		header_iv = (ImageView)this.header.findViewById(R.id.common_pull_header_image);
+		header_pb = (ProgressBar)this.header.findViewById(R.id.common_pull_header_progress);
+		header_stv = (TextView)this.header.findViewById(R.id.common_pull_header_state);
+		header_itv = (TextView)this.header.findViewById(R.id.common_pull_header_info);
 		header.setBackgroundDrawable(this._headerBackground);
 		header_iv.setVisibility(View.VISIBLE);
 		header_pb.setVisibility(View.VISIBLE);
@@ -199,7 +217,8 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 	@Override
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		this.t = t;
-		if (pulling) {
+		if (pulling)
+		{
 			scrollTo(0, 0);
 		}
 		super.onScrollChanged(l, t, oldl, oldt);
@@ -213,53 +232,57 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 	}
 
 	private void onRefresh() {
-		if (scroll_listener != null) {
+		if (scroll_listener != null)
+		{
 			scroll_listener.onRefresh();
 		}
 	}
 
 	private void resetHeader() {
-		switch (state) {
-		case STATE_DONE:
-			this.header_stv.setText(_headerStateDone);
-			this.header.setPadding(0, -1 * pull_header_height, 0, 0);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.VISIBLE);
-			break;
-		case STATE_PULLTOREFRESH:
-			this.header_stv.setText(_headerStatePull);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
-			if (isback) {
-				isback = false;
+		switch (state)
+		{
+			case STATE_DONE:
+				this.header_stv.setText(_headerStateDone);
+				this.header.setPadding(0, -1 * pull_header_height, 0, 0);
+				this.header_pb.setVisibility(View.GONE);
 				this.header_iv.clearAnimation();
-				this.header_iv.startAnimation(anim_down);
-			}
-			break;
-		case STATE_RELEASETOREFRESH:
-			this.header_stv.setText(_headerStateRelease);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				break;
+			case STATE_PULLTOREFRESH:
+				this.header_stv.setText(_headerStatePull);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				if (isback)
+				{
+					isback = false;
+					this.header_iv.clearAnimation();
+					this.header_iv.startAnimation(anim_down);
+				}
+				break;
+			case STATE_RELEASETOREFRESH:
+				this.header_stv.setText(_headerStateRelease);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
 
-			this.header_iv.clearAnimation();
-			this.header_iv.startAnimation(anim_up);
-			break;
-		case STATE_REFRESHING:
-			this.header.setPadding(0, 0, 0, 0);
-			this.header_stv.setText(_headerStateLoading);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.GONE);
-			this.header_pb.setVisibility(View.VISIBLE);
-			break;
-		default:
-			break;
+				this.header_iv.clearAnimation();
+				this.header_iv.startAnimation(anim_up);
+				break;
+			case STATE_REFRESHING:
+				this.header.setPadding(0, 0, 0, 0);
+				this.header_stv.setText(_headerStateLoading);
+				this.header_iv.clearAnimation();
+				this.header_iv.setVisibility(View.GONE);
+				this.header_pb.setVisibility(View.VISIBLE);
+				break;
+			default:
+				break;
 		}
 	}
 
 	public void setHeaderInfo(String text) {
 		this.header_itv.setText(text);
-		if (this.header_itv.getVisibility() != View.VISIBLE) {
+		if (this.header_itv.getVisibility() != View.VISIBLE)
+		{
 			this.header_itv.setVisibility(View.VISIBLE);
 		}
 	}
@@ -277,7 +300,8 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 	@Override
 	protected void initScroll() {
 		super.initScroll();
-		if (header != null) {
+		if (header != null)
+		{
 			pull_header_height = header_height;
 			header.setPadding(0, -1 * pull_header_height, 0, 0);
 			header_height = 0;

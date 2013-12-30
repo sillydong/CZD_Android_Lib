@@ -33,7 +33,8 @@ class SimpleMultipartEntity implements HttpEntity {
 	public SimpleMultipartEntity(AsyncHttpResponseHandler progressHandler) {
 		final StringBuffer buf = new StringBuffer();
 		final Random rand = new Random();
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 30; i++)
+		{
 			buf.append(MULTIPART_CHARS[rand.nextInt(MULTIPART_CHARS.length)]);
 		}
 		this.boundary = buf.toString();
@@ -47,13 +48,15 @@ class SimpleMultipartEntity implements HttpEntity {
 	}
 
 	public void addPart(final String key, final String value, final String contentType) {
-		try {
+		try
+		{
 			out.write(boundaryLine);
 			out.write(createContentDisposition(key));
 			out.write(CR_LF);
 			out.write(value.getBytes());
 			out.write(CR_LF);
-		} catch (final IOException e) {
+		} catch (final IOException e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -63,14 +66,16 @@ class SimpleMultipartEntity implements HttpEntity {
 	}
 
 	public void addPart(final String key, File file, String type) {
-		if (type == null) {
+		if (type == null)
+		{
 			type = APPLICATION_OCTET_STREAM;
 		}
 		fileParts.add(new FilePart(key, file, type));
 	}
 
 	public void addPart(final String key, String streamName, InputStream inputStream, String type) throws IOException {
-		if (type == null) {
+		if (type == null)
+		{
 			type = APPLICATION_OCTET_STREAM;
 		}
 		out.write(boundaryLine);
@@ -81,14 +86,17 @@ class SimpleMultipartEntity implements HttpEntity {
 
 		final byte[] tmp = new byte[4096];
 		int k = 0;
-		while ((k = inputStream.read(tmp,0,4096)) != -1) {
+		while ((k = inputStream.read(tmp, 0, 4096)) != -1)
+		{
 			out.write(tmp, 0, k);
 		}
 		out.write(CR_LF);
 		out.flush();
-		try {
+		try
+		{
 			inputStream.close();
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -116,9 +124,11 @@ class SimpleMultipartEntity implements HttpEntity {
 	@Override
 	public long getContentLength() {
 		long contentLen = out.size();
-		for (FilePart filePart : fileParts) {
+		for (FilePart filePart : fileParts)
+		{
 			long len = filePart.getTotalLength();
-			if (len < 0) {
+			if (len < 0)
+			{
 				return -1;
 			}
 			contentLen += len;
@@ -150,11 +160,12 @@ class SimpleMultipartEntity implements HttpEntity {
 	@Override
 	public void writeTo(final OutputStream outstream) throws IOException {
 		bytesWritten = 0;
-		totalSize = (int) getContentLength();
+		totalSize = (int)getContentLength();
 		out.writeTo(outstream);
 		updateProgress(out.size());
 
-		for (FilePart filePart : fileParts) {
+		for (FilePart filePart : fileParts)
+		{
 			filePart.writeTo(outstream);
 		}
 		outstream.write(boundaryEnd);
@@ -168,7 +179,8 @@ class SimpleMultipartEntity implements HttpEntity {
 
 	@Override
 	public void consumeContent() throws IOException, UnsupportedOperationException {
-		if (isStreaming()) {
+		if (isStreaming())
+		{
 			throw new UnsupportedOperationException("Streaming entity does not implement #consumeContent()");
 		}
 	}
@@ -191,14 +203,16 @@ class SimpleMultipartEntity implements HttpEntity {
 
 		private byte[] createHeader(String key, String filename, String type) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream();
-			try {
+			try
+			{
 				headerStream.write(boundaryLine);
 
 				headerStream.write(createContentDisposition(key, filename));
 				headerStream.write(createContentType(type));
 				headerStream.write(TRANSFER_ENCODING_BINARY);
 				headerStream.write(CR_LF);
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				// Can't happen on ByteArrayOutputStream
 			}
 			return headerStream.toByteArray();
@@ -215,16 +229,19 @@ class SimpleMultipartEntity implements HttpEntity {
 			FileInputStream inputStream = new FileInputStream(file);
 			byte[] tmp = new byte[4096];
 			int l = 0;
-			while ((l = inputStream.read(tmp,0,4096)) != -1) {
+			while ((l = inputStream.read(tmp, 0, 4096)) != -1)
+			{
 				out.write(tmp, 0, l);
 				updateProgress(l);
 			}
 			out.write(CR_LF);
 			updateProgress(CR_LF.length);
 			out.flush();
-			try {
+			try
+			{
 				inputStream.close();
-			} catch (final IOException e) {
+			} catch (final IOException e)
+			{
 				e.printStackTrace();
 			}
 		}

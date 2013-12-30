@@ -10,48 +10,61 @@ import java.security.NoSuchAlgorithmException;
 
 public class Rijndael {
 	public static String encrypt(String plainText, byte[] key) {
-		try {
+		try
+		{
 			Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-			int blockSize=cipher.getBlockSize();
+			int blockSize = cipher.getBlockSize();
 			byte[] dataBytes = plainText.getBytes();
-			int plaintTextLength=dataBytes.length;
-			if(plaintTextLength % blockSize !=0){
-				plaintTextLength = plaintTextLength+(blockSize - (plaintTextLength % blockSize));
+			int plaintTextLength = dataBytes.length;
+			if (plaintTextLength % blockSize != 0)
+			{
+				plaintTextLength = plaintTextLength + (blockSize - (plaintTextLength % blockSize));
 			}
 			byte[] plainTextByte = new byte[plaintTextLength];
 			System.arraycopy(dataBytes, 0, plainTextByte, 0, dataBytes.length);
 			cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
-			return Base64.encode(cipher.doFinal(plainTextByte))+String.format("%06d", plainText.length());
-		} catch (NoSuchAlgorithmException e) {
+			return Base64.encode(cipher.doFinal(plainTextByte)) + String.format("%06d", plainText.length());
+		} catch (NoSuchAlgorithmException e)
+		{
 			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
+		} catch (NoSuchPaddingException e)
+		{
 			e.printStackTrace();
-		} catch (InvalidKeyException e) {
+		} catch (InvalidKeyException e)
+		{
 			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
+		} catch (IllegalBlockSizeException e)
+		{
 			e.printStackTrace();
-		} catch (BadPaddingException e) {
+		} catch (BadPaddingException e)
+		{
 			e.printStackTrace();
 		}
 		return "";
 	}
-	
+
 	public static String decrypt(String cipherText, byte[] key) {
-		int plainTextLength=Integer.parseInt(cipherText.substring(cipherText.length()-6));
-		cipherText=cipherText.substring(0, cipherText.length()-6);
-		try {
+		int plainTextLength = Integer.parseInt(cipherText.substring(cipherText.length() - 6));
+		cipherText = cipherText.substring(0, cipherText.length() - 6);
+		try
+		{
 			Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
 			cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
 			return new String(cipher.doFinal(Base64.decode(cipherText.getBytes()))).substring(0, plainTextLength);
-		} catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e)
+		{
 			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
+		} catch (NoSuchPaddingException e)
+		{
 			e.printStackTrace();
-		} catch (InvalidKeyException e) {
+		} catch (InvalidKeyException e)
+		{
 			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
+		} catch (IllegalBlockSizeException e)
+		{
 			e.printStackTrace();
-		} catch (BadPaddingException e) {
+		} catch (BadPaddingException e)
+		{
 			e.printStackTrace();
 		}
 		return "";

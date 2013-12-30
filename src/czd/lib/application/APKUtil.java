@@ -13,12 +13,14 @@ import java.io.File;
 
 public class APKUtil {
 	public static boolean exist(String package_name) {
-		if (package_name.length() > 0) {
-			try {
-				ApplicationInfo info = ApplicationUtil.application_context.getPackageManager()
-						.getApplicationInfo(package_name, PackageManager.GET_UNINSTALLED_PACKAGES);
+		if (package_name.length() > 0)
+		{
+			try
+			{
+				ApplicationInfo info = ApplicationUtil.application_context.getPackageManager().getApplicationInfo(package_name, PackageManager.GET_UNINSTALLED_PACKAGES);
 				return info != null;
-			} catch (NameNotFoundException e) {
+			} catch (NameNotFoundException e)
+			{
 				e.printStackTrace();
 			}
 		}
@@ -35,24 +37,29 @@ public class APKUtil {
 
 	public static void launch(Activity activity, String package_name) throws Exception {
 		Intent intent = activity.getPackageManager().getLaunchIntentForPackage(package_name);
-		if (intent != null) {
+		if (intent != null)
+		{
 			activity.startActivity(intent);
 		}
-		else {
+		else
+		{
 			throw new Exception("Package Not Found");
 		}
 	}
 
 	public static boolean isFirstLaunch(Activity activity) {
-		try {
+		try
+		{
 			PackageInfo info = activity.getPackageManager().getPackageInfo(activity.getPackageName(), 0);
 			int currentVersion = info.versionCode;
 			int lastVersion = PreferenceUtil.getIntPreference(activity, "version_record", "last_version");
-			if (currentVersion > lastVersion) {
+			if (currentVersion > lastVersion)
+			{
 				PreferenceUtil.writeIntPreference(activity, "version_record", "last_version", currentVersion);
 				return true;
 			}
-		} catch (PackageManager.NameNotFoundException e) {
+		} catch (PackageManager.NameNotFoundException e)
+		{
 			e.printStackTrace();
 		}
 		return false;

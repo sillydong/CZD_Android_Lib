@@ -20,7 +20,8 @@ class RetryHandler implements HttpRequestRetryHandler {
 	private static HashSet<Class<?>> exceptionWhitelist = new HashSet<Class<?>>();
 	private static HashSet<Class<?>> exceptionBlacklist = new HashSet<Class<?>>();
 
-	static {
+	static
+	{
 		// Retry if the server dropped connection on us
 		exceptionWhitelist.add(NoHttpResponseException.class);
 		// retry-this, since it may happens as part of a Wi-Fi to 3G failover
@@ -43,37 +44,44 @@ class RetryHandler implements HttpRequestRetryHandler {
 	public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
 		boolean retry = true;
 
-		Boolean b = (Boolean) context.getAttribute(ExecutionContext.HTTP_REQ_SENT);
+		Boolean b = (Boolean)context.getAttribute(ExecutionContext.HTTP_REQ_SENT);
 		boolean sent = (b != null && b.booleanValue());
 
-		if (executionCount > maxRetries) {
+		if (executionCount > maxRetries)
+		{
 			// Do not retry if over max retry count
 			retry = false;
 		}
-		else if (isInList(exceptionBlacklist, exception)) {
+		else if (isInList(exceptionBlacklist, exception))
+		{
 			// immediately cancel retry if the error is blacklisted
 			retry = false;
 		}
-		else if (isInList(exceptionWhitelist, exception)) {
+		else if (isInList(exceptionWhitelist, exception))
+		{
 			// immediately retry if error is whitelisted
 			retry = true;
 		}
-		else if (!sent) {
+		else if (!sent)
+		{
 			// for most other errors, retry only if request hasn't been fully sent yet
 			retry = true;
 		}
 
-		if (retry) {
+		if (retry)
+		{
 			// resend all idempotent requests
-			HttpUriRequest currentReq = (HttpUriRequest) context.getAttribute(ExecutionContext.HTTP_REQUEST);
+			HttpUriRequest currentReq = (HttpUriRequest)context.getAttribute(ExecutionContext.HTTP_REQUEST);
 			String requestType = currentReq.getMethod();
 			retry = !requestType.equals("POST");
 		}
 
-		if (retry) {
+		if (retry)
+		{
 			SystemClock.sleep(RETRY_SLEEP_TIME_MILLIS);
 		}
-		else {
+		else
+		{
 			exception.printStackTrace();
 		}
 
@@ -82,8 +90,10 @@ class RetryHandler implements HttpRequestRetryHandler {
 
 	protected boolean isInList(HashSet<Class<?>> list, Throwable error) {
 		Iterator<Class<?>> itr = list.iterator();
-		while (itr.hasNext()) {
-			if (itr.next().isInstance(error)) {
+		while (itr.hasNext())
+		{
+			if (itr.next().isInstance(error))
+			{
 				return true;
 			}
 		}

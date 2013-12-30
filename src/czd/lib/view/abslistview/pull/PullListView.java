@@ -75,7 +75,8 @@ public class PullListView extends ListView implements OnScrollListener {
 	@SuppressWarnings("deprecation")
 	private void init(Context context, AttributeSet attrs) {
 		this._context = context;
-		if (attrs != null) {
+		if (attrs != null)
+		{
 			TypedArray tattrs = this._context.obtainStyledAttributes(attrs, R.styleable.PullView);
 			this._headerStatePull = tattrs.getString(0);
 			this._headerStateRelease = tattrs.getString(1);
@@ -86,11 +87,11 @@ public class PullListView extends ListView implements OnScrollListener {
 			this._headerInfoVisible = tattrs.getInt(6, View.VISIBLE);
 			tattrs.recycle();
 		}
-		this.header = (LinearLayout) ViewUtil.viewById(this._context, R.layout.common_pull_header);
-		this.header_iv = (ImageView) this.header.findViewById(R.id.common_pull_header_image);
-		this.header_pb = (ProgressBar) this.header.findViewById(R.id.common_pull_header_progress);
-		this.header_stv = (TextView) this.header.findViewById(R.id.common_pull_header_state);
-		this.header_itv = (TextView) this.header.findViewById(R.id.common_pull_header_info);
+		this.header = (LinearLayout)ViewUtil.viewById(this._context, R.layout.common_pull_header);
+		this.header_iv = (ImageView)this.header.findViewById(R.id.common_pull_header_image);
+		this.header_pb = (ProgressBar)this.header.findViewById(R.id.common_pull_header_progress);
+		this.header_stv = (TextView)this.header.findViewById(R.id.common_pull_header_state);
+		this.header_itv = (TextView)this.header.findViewById(R.id.common_pull_header_info);
 		this.header.setBackgroundDrawable(this._headerBackground);
 		this.header_iv.setVisibility(View.VISIBLE);
 		this.header_pb.setVisibility(View.VISIBLE);
@@ -124,10 +125,13 @@ public class PullListView extends ListView implements OnScrollListener {
 
 	@Override
 	public final boolean onInterceptTouchEvent(MotionEvent event) {
-		if (refreshable) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-				if (state != STATE_REFRESHING && firstVisibleItem == 0) {
-					startY = (int) event.getY();
+		if (refreshable)
+		{
+			if (event.getAction() == MotionEvent.ACTION_DOWN)
+			{
+				if (state != STATE_REFRESHING && firstVisibleItem == 0)
+				{
+					startY = (int)event.getY();
 				}
 			}
 
@@ -137,77 +141,91 @@ public class PullListView extends ListView implements OnScrollListener {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
-		if (refreshable) {
-			switch (ev.getAction()) {
-			case MotionEvent.ACTION_UP:
-				if (startY != 0) {
-					if (state != STATE_REFRESHING) {
-						switch (state) {
-						case STATE_PULLTOREFRESH:
-							state = STATE_DONE;
-							resetHeader();
-							break;
-						case STATE_RELEASETOREFRESH:
-							state = STATE_REFRESHING;
-							resetHeader();
-							onRefresh();
-							break;
-						default:
-							break;
+		if (refreshable)
+		{
+			switch (ev.getAction())
+			{
+				case MotionEvent.ACTION_UP:
+					if (startY != 0)
+					{
+						if (state != STATE_REFRESHING)
+						{
+							switch (state)
+							{
+								case STATE_PULLTOREFRESH:
+									state = STATE_DONE;
+									resetHeader();
+									break;
+								case STATE_RELEASETOREFRESH:
+									state = STATE_REFRESHING;
+									resetHeader();
+									onRefresh();
+									break;
+								default:
+									break;
+							}
+						}
+						isback = false;
+						startY = 0;
+					}
+					pulling = false;
+					break;
+				case MotionEvent.ACTION_MOVE:
+					if (state != STATE_REFRESHING && firstVisibleItem == 0 && startY > 0)
+					{
+						int tmpY = (int)ev.getY();
+						switch (state)
+						{
+							case STATE_RELEASETOREFRESH:
+								pulling = true;
+								setSelection(0);
+								if (tmpY <= startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO < header_height)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+								}
+								break;
+							case STATE_PULLTOREFRESH:
+								pulling = true;
+								setSelection(0);
+								if (tmpY <= startY)
+								{
+									state = STATE_DONE;
+									resetHeader();
+								}
+								else if ((tmpY - startY) / RATIO >= header_height)
+								{
+									state = STATE_RELEASETOREFRESH;
+									isback = true;
+									resetHeader();
+								}
+								break;
+							case STATE_DONE:
+								if (tmpY > startY)
+								{
+									state = STATE_PULLTOREFRESH;
+									resetHeader();
+									pulling = true;
+								}
+								else
+								{
+									startY = 0;
+								}
+								break;
+							default:
+								break;
+						}
+						if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH))
+						{
+							header.setPadding(0, (tmpY - startY) / RATIO - header_height, 0, 0);
 						}
 					}
-					isback = false;
-					startY = 0;
-				}
-				pulling = false;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				if (state != STATE_REFRESHING && firstVisibleItem == 0 && startY > 0) {
-					int tmpY = (int) ev.getY();
-					switch (state) {
-					case STATE_RELEASETOREFRESH:
-						pulling = true;
-						setSelection(0);
-						if (tmpY <= startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO < header_height) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-						}
-						break;
-					case STATE_PULLTOREFRESH:
-						pulling = true;
-						setSelection(0);
-						if (tmpY <= startY) {
-							state = STATE_DONE;
-							resetHeader();
-						}
-						else if ((tmpY - startY) / RATIO >= header_height) {
-							state = STATE_RELEASETOREFRESH;
-							isback = true;
-							resetHeader();
-						}
-						break;
-					case STATE_DONE:
-						if (tmpY > startY) {
-							state = STATE_PULLTOREFRESH;
-							resetHeader();
-							pulling = true;
-						}
-						else {
-							startY = 0;
-						}
-						break;
-					default:
-						break;
-					}
-					if (pulling && (state == STATE_PULLTOREFRESH || state == STATE_RELEASETOREFRESH)) {
-						header.setPadding(0, (tmpY - startY) / RATIO - header_height, 0, 0);
-					}
-				}
-				break;
+					break;
 			}
 		}
 		return super.onTouchEvent(ev);
@@ -216,36 +234,46 @@ public class PullListView extends ListView implements OnScrollListener {
 	@Override
 	public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 		this.firstVisibleItem = firstVisibleItem;
-		if (pulling) {
+		if (pulling)
+		{
 			setSelection(0);
 		}
-		if (this.listener != null) {
+		if (this.listener != null)
+		{
 			this.listener.onScrollStop(view, firstVisibleItem, visibleItemCount, totalItemCount);
 		}
 		whereami(firstVisibleItem, visibleItemCount, totalItemCount);
 	}
 
 	private void whereami(int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-		if (firstVisibleItem <= 2) {
-			if (!onTop && this.listener != null) {
+		if (firstVisibleItem <= 2)
+		{
+			if (!onTop && this.listener != null)
+			{
 				onTop = true;
 				listener.onTop(firstVisibleItem, visibleItemCount, totalItemCount);
 			}
 		}
-		else {
-			if (onTop && listener != null) {
+		else
+		{
+			if (onTop && listener != null)
+			{
 				onTop = false;
 				listener.outTop(firstVisibleItem, visibleItemCount, totalItemCount);
 			}
 		}
-		if (totalItemCount - visibleItemCount - firstVisibleItem + 1 <= 2) {
-			if (!onBottom && listener != null) {
+		if (totalItemCount - visibleItemCount - firstVisibleItem + 1 <= 2)
+		{
+			if (!onBottom && listener != null)
+			{
 				onBottom = true;
 				listener.onBottom(firstVisibleItem, visibleItemCount, totalItemCount);
 			}
 		}
-		else {
-			if (onBottom && listener != null) {
+		else
+		{
+			if (onBottom && listener != null)
+			{
 				onBottom = false;
 				listener.outBottom(firstVisibleItem, visibleItemCount, totalItemCount);
 			}
@@ -254,7 +282,8 @@ public class PullListView extends ListView implements OnScrollListener {
 
 	public void setHeaderInfo(String text) {
 		this.header_itv.setText(text);
-		if (this.header_itv.getVisibility() != View.VISIBLE) {
+		if (this.header_itv.getVisibility() != View.VISIBLE)
+		{
 			this.header_itv.setVisibility(View.VISIBLE);
 		}
 	}
@@ -276,47 +305,50 @@ public class PullListView extends ListView implements OnScrollListener {
 	}
 
 	private void onRefresh() {
-		if (listener != null) {
+		if (listener != null)
+		{
 			listener.onRefresh();
 		}
 	}
 
 	private void resetHeader() {
-		switch (state) {
-		case STATE_DONE:
-			this.header_stv.setText(_headerStateDone);
-			this.header.setPadding(0, -1 * header_height, 0, 0);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.VISIBLE);
-			break;
-		case STATE_PULLTOREFRESH:
-			this.header_stv.setText(_headerStatePull);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
-			if (isback) {
-				isback = false;
+		switch (state)
+		{
+			case STATE_DONE:
+				this.header_stv.setText(_headerStateDone);
+				this.header.setPadding(0, -1 * header_height, 0, 0);
+				this.header_pb.setVisibility(View.GONE);
 				this.header_iv.clearAnimation();
-				this.header_iv.startAnimation(anim_down);
-			}
-			break;
-		case STATE_RELEASETOREFRESH:
-			this.header_stv.setText(_headerStateRelease);
-			this.header_pb.setVisibility(View.GONE);
-			this.header_iv.setVisibility(View.VISIBLE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				break;
+			case STATE_PULLTOREFRESH:
+				this.header_stv.setText(_headerStatePull);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
+				if (isback)
+				{
+					isback = false;
+					this.header_iv.clearAnimation();
+					this.header_iv.startAnimation(anim_down);
+				}
+				break;
+			case STATE_RELEASETOREFRESH:
+				this.header_stv.setText(_headerStateRelease);
+				this.header_pb.setVisibility(View.GONE);
+				this.header_iv.setVisibility(View.VISIBLE);
 
-			this.header_iv.clearAnimation();
-			this.header_iv.startAnimation(anim_up);
-			break;
-		case STATE_REFRESHING:
-			this.header.setPadding(0, 0, 0, 0);
-			this.header_stv.setText(_headerStateLoading);
-			this.header_iv.clearAnimation();
-			this.header_iv.setVisibility(View.GONE);
-			this.header_pb.setVisibility(View.VISIBLE);
-			break;
-		default:
-			break;
+				this.header_iv.clearAnimation();
+				this.header_iv.startAnimation(anim_up);
+				break;
+			case STATE_REFRESHING:
+				this.header.setPadding(0, 0, 0, 0);
+				this.header_stv.setText(_headerStateLoading);
+				this.header_iv.clearAnimation();
+				this.header_iv.setVisibility(View.GONE);
+				this.header_pb.setVisibility(View.VISIBLE);
+				break;
+			default:
+				break;
 		}
 	}
 }

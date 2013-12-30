@@ -21,22 +21,27 @@ public class DropdownContainer extends PopupWindow {
 	public DropdownContainer(Context context, int layout_id, Drawable background, DropdownAdapter adapter, OnItemClickListener listener) throws Exception {
 		super(context);
 		int m = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-		AbsListView content = (AbsListView) LayoutInflater.from(context).inflate(layout_id, null);
-		if (content instanceof ListView) {
-			((ListView) content).setAdapter(adapter);
+		AbsListView content = (AbsListView)LayoutInflater.from(context).inflate(layout_id, null);
+		if (content instanceof ListView)
+		{
+			((ListView)content).setAdapter(adapter);
 		}
-		else if (content instanceof GridView) {
-			((GridView) content).setAdapter(adapter);
+		else if (content instanceof GridView)
+		{
+			((GridView)content).setAdapter(adapter);
 		}
-		else{
+		else
+		{
 			throw new Exception("not an AbsListView");
 		}
 		content.setOnItemClickListener(listener);
 		content.measure(m, m);
-		if (adapter.getRows() > adapter.getWrapRow()) {
+		if (adapter.getRows() > adapter.getWrapRow())
+		{
 			init(content, LayoutParams.WRAP_CONTENT, content.getMeasuredHeight() * adapter.getWrapRow(), R.style.drop_down_anim, background);
 		}
-		else {
+		else
+		{
 			init(content, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, R.style.drop_down_anim, background);
 		}
 	}
@@ -44,13 +49,16 @@ public class DropdownContainer extends PopupWindow {
 	@SuppressWarnings("deprecation")
 	private void init(final View view, int width, int height, int anim, Drawable background) {
 		setContentView(view);
-		if (anim != 0) {
+		if (anim != 0)
+		{
 			setAnimationStyle(anim);
 		}
-		if (background == null) {
+		if (background == null)
+		{
 			setBackgroundDrawable(new BitmapDrawable());
 		}
-		else {
+		else
+		{
 			setBackgroundDrawable(background);
 		}
 		setWidth(width);

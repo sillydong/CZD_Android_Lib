@@ -11,7 +11,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore.MediaColumns;
 import czd.lib.application.ApplicationUtil;
-import czd.lib.io.FileUtil;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -27,32 +26,97 @@ public class ImageUtil {
 	public static Bitmap getBitmapFromUrl(String url) {
 		Bitmap bitmap = null;
 
-		try {
-			HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+		try
+		{
+			HttpURLConnection conn = (HttpURLConnection)new URL(url).openConnection();
 			conn.setConnectTimeout(2000);
 			conn.setUseCaches(true);
 			conn.setInstanceFollowRedirects(true);
 			BitmapFactory.Options o2 = new BitmapFactory.Options();
 			o2.inInputShareable = true;
 			o2.inPurgeable = true;
-			bitmap = BitmapFactory.decodeStream(new BufferedInputStream((InputStream) conn.getContent()), new Rect(-1, -1, -1, -1), o2);
-		} catch (Exception e) {
+			bitmap = BitmapFactory.decodeStream(new BufferedInputStream((InputStream)conn.getContent()), new Rect(-1, -1, -1, -1), o2);
+		} catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 		return bitmap;
 	}
 
-	public static Bitmap getBitmapFromFile(String filepath) {
-		byte[] data = FileUtil.readFile(new File(filepath));
-		BitmapFactory.Options o2 = new BitmapFactory.Options();
-		o2.inInputShareable = true;
+	public static Bitmap getBitmapFromFile(File file) {
+		final BitmapFactory.Options o2 = new BitmapFactory.Options();
 		o2.inPurgeable = true;
-		return BitmapFactory.decodeByteArray(data, 0, data.length, o2);
+		o2.inInputShareable = true;
+		BufferedInputStream bis = null;
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			return BitmapFactory.decodeStream(bis, new Rect(-1, -1, -1, -1), o2);
+		} catch (OutOfMemoryError e)
+		{
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (fis != null)
+					fis.close();
+				if (bis != null)
+					bis.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	public static Bitmap getBitmapFromFile(File file, int width, int height) {
+		final BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inJustDecodeBounds = true;
+		o2.inPurgeable = true;
+		o2.inInputShareable = true;
+		BitmapFactory.decodeFile(file.getAbsolutePath(), o2);
+		o2.inSampleSize = ImageUtil.calculateInSampleSize(o2.outWidth, o2.outHeight, width, height);
+		o2.inJustDecodeBounds = false;
+		BufferedInputStream bis = null;
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			return BitmapFactory.decodeStream(bis, new Rect(-1, -1, -1, -1), o2);
+		} catch (OutOfMemoryError e)
+		{
+			e.printStackTrace();
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (fis != null)
+					fis.close();
+				if (bis != null)
+					bis.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
 	}
 
 	public static Bitmap getBitmapFromAsset(String filename) {
 		InputStream is = null;
-		try {
+		try
+		{
 			BitmapFactory.Options bo = new BitmapFactory.Options();
 			bo.inScaled = false;
 			bo.inDensity = 0;
@@ -60,48 +124,50 @@ public class ImageUtil {
 			bo.inInputShareable = true;
 			is = ApplicationUtil.application_context.getAssets().open(filename);
 			return BitmapFactory.decodeStream(is, null, bo);
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
-		} finally {
-			try {
+		} finally
+		{
+			try
+			{
 				is.close();
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				e.printStackTrace();
 			}
 		}
 		return null;
 	}
 
-	public static void saveBitmapToFile(final String filepath, final Bitmap bitmap) {
-		new Thread() {
-
-			@Override
-			public void run() {
-				super.run();
-				BufferedOutputStream ostream = null;
-				try {
-					ostream = new BufferedOutputStream(new FileOutputStream(new File(filepath)), 2 * 1024);
-					bitmap.compress(CompressFormat.PNG, 100, ostream);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} finally {
-					try {
-						if (ostream != null) {
-							ostream.flush();
-							ostream.close();
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+	public static boolean saveBitmapToFile(File file, Bitmap bitmap) {
+		BufferedOutputStream ostream = null;
+		try
+		{
+			ostream = new BufferedOutputStream(new FileOutputStream(file), 2 * 1024);
+			return bitmap.compress(CompressFormat.PNG, 100, ostream);
+		} catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (ostream != null)
+				{
+					ostream.flush();
+					ostream.close();
 				}
+			} catch (IOException e)
+			{
+				e.printStackTrace();
 			}
-
-		}.start();
+		}
+		return false;
 	}
 
 	public static Bitmap drawableToBitmap(Drawable drawable) {
-		Bitmap bitmap = Bitmap
-				.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
+		Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888 : Bitmap.Config.RGB_565);
 		Canvas canvas = new Canvas(bitmap);
 		drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
 		drawable.draw(canvas);
@@ -114,7 +180,7 @@ public class ImageUtil {
 	}
 
 	public static String getMediaPath(Context context, Uri uri) {
-		String[] projection = { MediaColumns.DATA };
+		String[] projection = {MediaColumns.DATA};
 		Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
 		int column_index = cursor.getColumnIndexOrThrow(MediaColumns.DATA);
 		cursor.moveToFirst();
@@ -122,7 +188,8 @@ public class ImageUtil {
 	}
 
 	public static Bitmap clipBitmap(int type, Bitmap bitmap, int roundPx) {
-		try {
+		try
+		{
 			final int width = bitmap.getWidth();
 			final int height = bitmap.getHeight();
 
@@ -134,31 +201,33 @@ public class ImageUtil {
 			paint.setAntiAlias(true);
 			paint.setColor(Color.BLACK);
 
-			switch (type) {
-			case CLIP_ALL:
-				clipAll(canvas, paint, roundPx, width, height);
-				break;
-			case CLIP_LEFT:
-				clipLeft(canvas, paint, roundPx, width, height);
-				break;
-			case CLIP_RIGHT:
-				clipRight(canvas, paint, roundPx, width, height);
-				break;
-			case CLIP_TOP:
-				clipTop(canvas, paint, roundPx, width, height);
-				break;
-			case CLIP_BOTTOM:
-				clipBottom(canvas, paint, roundPx, width, height);
-				break;
-			default:
-				break;
+			switch (type)
+			{
+				case CLIP_ALL:
+					clipAll(canvas, paint, roundPx, width, height);
+					break;
+				case CLIP_LEFT:
+					clipLeft(canvas, paint, roundPx, width, height);
+					break;
+				case CLIP_RIGHT:
+					clipRight(canvas, paint, roundPx, width, height);
+					break;
+				case CLIP_TOP:
+					clipTop(canvas, paint, roundPx, width, height);
+					break;
+				case CLIP_BOTTOM:
+					clipBottom(canvas, paint, roundPx, width, height);
+					break;
+				default:
+					break;
 			}
 			paint.setXfermode(new PorterDuffXfermode(Mode.SRC_IN));
 			final Rect src = new Rect(0, 0, width, height);
 			final Rect dst = src;
 			canvas.drawBitmap(bitmap, src, dst, paint);
 			return paintingBoard;
-		} catch (Exception exp) {
+		} catch (Exception exp)
+		{
 			return bitmap;
 		}
 	}
@@ -197,24 +266,30 @@ public class ImageUtil {
 	}
 
 	public static Bitmap resizeBitmap(Bitmap bitmap, int width, int height, int degree, boolean cut) {
-		if (width <= 0 && height <= 0) {
+		if (width <= 0 && height <= 0)
+		{
 			//只旋转
-			if (degree > 0) {
+			if (degree > 0)
+			{
 				return rotate(bitmap, degree);
 			}
-			else {
+			else
+			{
 				return bitmap;
 			}
 		}
 		int src_w = bitmap.getWidth();
 		int src_h = bitmap.getHeight();
 
-		if (src_w <= width || src_h <= height) {
+		if (src_w <= width || src_h <= height)
+		{
 			//放大
-			if (degree > 0) {
+			if (degree > 0)
+			{
 				return rotate(bitmap, degree);
 			}
-			else {
+			else
+			{
 				return bitmap;
 			}
 		}
@@ -223,43 +298,52 @@ public class ImageUtil {
 		int start_y = 0;
 		float scale = 0f;
 
-		if (width > 0 && height <= 0) {
+		if (width > 0 && height <= 0)
+		{
 			//限宽，不考虑scale和cut
-			scale = (float) width / (float) src_w;
+			scale = (float)width / (float)src_w;
 		}
-		else if (width <= 0 && height > 0) {
+		else if (width <= 0 && height > 0)
+		{
 			//限高，不考虑scale和cut
-			scale = (float) height / (float) src_h;
+			scale = (float)height / (float)src_h;
 		}
-		else {
+		else
+		{
 			//双限，考虑scale和cut
-			float scale_w = (float) width / (float) src_w;
-			float scale_h = (float) height / (float) src_h;
-			if (cut) {
+			float scale_w = (float)width / (float)src_w;
+			float scale_h = (float)height / (float)src_h;
+			if (cut)
+			{
 				scale = Math.max(scale_w, scale_h);
-				start_x = (int) Math.round(Math.abs(src_w - width / scale) / 2);
-				start_y = (int) Math.round(Math.abs(src_h - height / scale) / 2);
+				start_x = (int)Math.round(Math.abs(src_w - width / scale) / 2);
+				start_y = (int)Math.round(Math.abs(src_h - height / scale) / 2);
 				start_x = Math.max(0, start_x);
 				start_y = Math.max(0, start_y);
 			}
-			else {
+			else
+			{
 				scale = Math.min(scale_w, scale_h);
 			}
 		}
-		if (degree == 0 && start_x == 0 && start_y == 0) {
-			Bitmap b2 = Bitmap.createScaledBitmap(bitmap, (int) (scale * src_w), (int) (scale * src_h), true);
-			if (bitmap != b2) {
+		if (degree == 0 && start_x == 0 && start_y == 0)
+		{
+			Bitmap b2 = Bitmap.createScaledBitmap(bitmap, (int)(scale * src_w), (int)(scale * src_h), true);
+			if (bitmap != b2)
+			{
 				bitmap.recycle();
 			}
 			return b2;
 		}
-		else {
+		else
+		{
 			Matrix matrix = new Matrix();
 			matrix.setScale(scale, scale);
 
 			matrix.postRotate(degree, scale * src_w / 2, scale * src_h / 2);
 			Bitmap b2 = Bitmap.createBitmap(bitmap, start_x, start_y, src_w, src_h, matrix, true);
-			if (bitmap != b2) {
+			if (bitmap != b2)
+			{
 				bitmap.recycle();
 			}
 			return b2;
@@ -272,38 +356,48 @@ public class ImageUtil {
 		int width = maxSize;
 		int height = maxSize;
 		boolean needsResize = false;
-		if (srcWidth > srcHeight) {
-			if (srcWidth > maxSize) {
+		if (srcWidth > srcHeight)
+		{
+			if (srcWidth > maxSize)
+			{
 				needsResize = true;
 				height = ((maxSize * srcHeight) / srcWidth);
 			}
 		}
-		else {
-			if (srcHeight > maxSize) {
+		else
+		{
+			if (srcHeight > maxSize)
+			{
 				needsResize = true;
 				width = ((maxSize * srcWidth) / srcHeight);
 			}
 		}
-		if (needsResize) {
+		if (needsResize)
+		{
 			Bitmap retVal = Bitmap.createScaledBitmap(bitmap, width, height, true);
 			return retVal;
 		}
-		else {
+		else
+		{
 			return bitmap;
 		}
 	}
 
 	public static Bitmap rotate(Bitmap bitmap, float degree) {
-		if (degree != 0 && bitmap != null) {
+		if (degree != 0 && bitmap != null)
+		{
 			Matrix m = new Matrix();
-			m.setRotate(degree, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
-			try {
+			m.setRotate(degree, (float)bitmap.getWidth() / 2, (float)bitmap.getHeight() / 2);
+			try
+			{
 				Bitmap b2 = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-				if (bitmap != b2) {
+				if (bitmap != b2)
+				{
 					bitmap.recycle();
 					bitmap = b2;
 				}
-			} catch (OutOfMemoryError ex) {
+			} catch (OutOfMemoryError ex)
+			{
 				// We have no memory to rotate. Return the original bitmap.
 			}
 		}
@@ -313,7 +407,8 @@ public class ImageUtil {
 	public static Bitmap transform(Matrix scaler, Bitmap source, int targetWidth, int targetHeight, boolean scaleUp) {
 		int deltaX = source.getWidth() - targetWidth;
 		int deltaY = source.getHeight() - targetHeight;
-		if (!scaleUp && (deltaX < 0 || deltaY < 0)) {
+		if (!scaleUp && (deltaX < 0 || deltaY < 0))
+		{
 			/*
 			 * In this case the bitmap is smaller, at least in one dimension,
 			 * than the target. Transform it by placing as much of the image as
@@ -325,8 +420,7 @@ public class ImageUtil {
 
 			int deltaXHalf = Math.max(0, deltaX / 2);
 			int deltaYHalf = Math.max(0, deltaY / 2);
-			Rect src = new Rect(deltaXHalf, deltaYHalf, deltaXHalf + Math.min(targetWidth, source.getWidth()), deltaYHalf + Math.min(targetHeight, source
-					.getHeight()));
+			Rect src = new Rect(deltaXHalf, deltaYHalf, deltaXHalf + Math.min(targetWidth, source.getWidth()), deltaYHalf + Math.min(targetHeight, source.getHeight()));
 			int dstX = (targetWidth - src.width()) / 2;
 			int dstY = (targetHeight - src.height()) / 2;
 			Rect dst = new Rect(dstX, dstY, targetWidth - dstX, targetHeight - dstY);
@@ -337,33 +431,41 @@ public class ImageUtil {
 		float bitmapHeightF = source.getHeight();
 
 		float bitmapAspect = bitmapWidthF / bitmapHeightF;
-		float viewAspect = (float) targetWidth / targetHeight;
+		float viewAspect = (float)targetWidth / targetHeight;
 
-		if (bitmapAspect > viewAspect) {
+		if (bitmapAspect > viewAspect)
+		{
 			float scale = targetHeight / bitmapHeightF;
-			if (scale < .9F || scale > 1F) {
+			if (scale < .9F || scale > 1F)
+			{
 				scaler.setScale(scale, scale);
 			}
-			else {
+			else
+			{
 				scaler = null;
 			}
 		}
-		else {
+		else
+		{
 			float scale = targetWidth / bitmapWidthF;
-			if (scale < .9F || scale > 1F) {
+			if (scale < .9F || scale > 1F)
+			{
 				scaler.setScale(scale, scale);
 			}
-			else {
+			else
+			{
 				scaler = null;
 			}
 		}
 
 		Bitmap b1;
-		if (scaler != null) {
+		if (scaler != null)
+		{
 			// this is used for minithumb and crop, so we want to filter here.
 			b1 = Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), scaler, true);
 		}
-		else {
+		else
+		{
 			b1 = source;
 		}
 
@@ -372,7 +474,8 @@ public class ImageUtil {
 
 		Bitmap b2 = Bitmap.createBitmap(b1, dx1 / 2, dy1 / 2, targetWidth, targetHeight);
 
-		if (b1 != source) {
+		if (b1 != source)
+		{
 			b1.recycle();
 		}
 
@@ -380,22 +483,26 @@ public class ImageUtil {
 	}
 
 	public static Bitmap extractMiniThumb(Bitmap source, int width, int height, boolean recycle) {
-		if (source == null) {
+		if (source == null)
+		{
 			return null;
 		}
 
 		float scale;
-		if (source.getWidth() < source.getHeight()) {
-			scale = width / (float) source.getWidth();
+		if (source.getWidth() < source.getHeight())
+		{
+			scale = width / (float)source.getWidth();
 		}
-		else {
-			scale = height / (float) source.getHeight();
+		else
+		{
+			scale = height / (float)source.getHeight();
 		}
 		Matrix matrix = new Matrix();
 		matrix.setScale(scale, scale);
 		Bitmap miniThumbnail = transform(matrix, source, width, height, false);
 
-		if (recycle && miniThumbnail != source) {
+		if (recycle && miniThumbnail != source)
+		{
 			source.recycle();
 		}
 		return miniThumbnail;
@@ -404,19 +511,23 @@ public class ImageUtil {
 	public static int calculateInSampleSize(int width, int height, int reqWidth, int reqHeight) {
 		int inSampleSize = 1;
 
-		if (height > reqHeight || width > reqWidth) {
-			if (width > height) {
-				inSampleSize = Math.round((float) height / (float) reqHeight);
+		if (height > reqHeight || width > reqWidth)
+		{
+			if (width > height)
+			{
+				inSampleSize = Math.round((float)height / (float)reqHeight);
 			}
-			else {
-				inSampleSize = Math.round((float) width / (float) reqWidth);
+			else
+			{
+				inSampleSize = Math.round((float)width / (float)reqWidth);
 			}
 
 			final float totalPixels = width * height;
 
 			final float totalReqPixelsCap = reqWidth * reqHeight;
 
-			while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
+			while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap)
+			{
 				inSampleSize++;
 			}
 		}

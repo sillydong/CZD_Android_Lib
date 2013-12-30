@@ -11,61 +11,59 @@ import android.os.Message;
 import android.util.Log;
 
 /**
- * 
  * @author Chen.Zhidong
  *         2012-1-5
- * 
  */
 public class BasicLocationLoader implements LocationListener {
 
-	private Criteria cr;
 	private LocationManager locationManager;
 	private static final int HANDLER_COMPLETE = 0;
 	private static final int HANDLER_CONNECT = 1;
 	private static final int HANDLER_ERROR = 2;
 	private static final int HANDLER_EMPTY = 3;
-	private Context mContext;
 	private Handler locationhandler;
 	private Location result = null;
 	private String provider;
 
 	public BasicLocationLoader(final Context context, final LocationCallback _callback) {
-		mContext = context;
 		locationhandler = new Handler() {
 
 			@Override
 			public void handleMessage(Message msg) {
 				super.handleMessage(msg);
-				switch (msg.what) {
-				case HANDLER_COMPLETE:
-					locationManager.removeUpdates(BasicLocationLoader.this);
-					_callback.LocationLoadComplete((Location) msg.obj);
-					break;
-				case HANDLER_CONNECT:
-					_callback.LocationLoadConnect();
-					break;
-				case HANDLER_ERROR:
-					locationManager.removeUpdates(BasicLocationLoader.this);
-					_callback.LocationLoadError((String) msg.obj);
-					break;
-				case HANDLER_EMPTY:
-					_callback.LocationLoadEmptyProvider();
-					break;
-				default:
-					break;
+				switch (msg.what)
+				{
+					case HANDLER_COMPLETE:
+						locationManager.removeUpdates(BasicLocationLoader.this);
+						_callback.LocationLoadComplete((Location)msg.obj);
+						break;
+					case HANDLER_CONNECT:
+						_callback.LocationLoadConnect();
+						break;
+					case HANDLER_ERROR:
+						locationManager.removeUpdates(BasicLocationLoader.this);
+						_callback.LocationLoadError((String)msg.obj);
+						break;
+					case HANDLER_EMPTY:
+						_callback.LocationLoadEmptyProvider();
+						break;
+					default:
+						break;
 				}
 			}
 
 		};
 
-		locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 
-		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+		if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) && !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+		{
 			locationhandler.sendEmptyMessage(HANDLER_EMPTY);
 		}
-		else {
+		else
+		{
 			locationhandler.sendEmptyMessage(HANDLER_CONNECT);
-			cr = new Criteria();
+			Criteria cr = new Criteria();
 			cr.setAccuracy(Criteria.ACCURACY_FINE);
 			cr.setAltitudeRequired(false);
 			cr.setBearingRequired(false);
@@ -73,10 +71,12 @@ public class BasicLocationLoader implements LocationListener {
 			cr.setPowerRequirement(Criteria.POWER_MEDIUM);
 			provider = locationManager.getBestProvider(cr, true);
 			result = locationManager.getLastKnownLocation(provider);
-			if (result == null) {
+			if (result == null)
+			{
 				locationManager.requestLocationUpdates(provider, 0, 0, this);
 			}
-			else {
+			else
+			{
 				locationhandler.sendMessage(locationhandler.obtainMessage(HANDLER_COMPLETE, result));
 			}
 		}
@@ -84,23 +84,29 @@ public class BasicLocationLoader implements LocationListener {
 
 	@Override
 	public void onLocationChanged(Location location) {
-		if (location == null) {
-			if (provider.equals(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+		if (location == null)
+		{
+			if (provider.equals(LocationManager.GPS_PROVIDER) && locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+			{
 				provider = LocationManager.NETWORK_PROVIDER;
 				result = locationManager.getLastKnownLocation(provider);
 			}
-			else if (provider.equals(LocationManager.NETWORK_PROVIDER) && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+			else if (provider.equals(LocationManager.NETWORK_PROVIDER) && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+			{
 				provider = LocationManager.GPS_PROVIDER;
 				result = locationManager.getLastKnownLocation(provider);
 			}
-			if (result == null) {
+			if (result == null)
+			{
 				locationhandler.sendMessage(locationhandler.obtainMessage(HANDLER_ERROR, "无法获得当前位置！"));
 			}
-			else {
+			else
+			{
 				locationhandler.sendMessage(locationhandler.obtainMessage(HANDLER_COMPLETE, result));
 			}
 		}
-		else {
+		else
+		{
 			locationhandler.sendMessage(locationhandler.obtainMessage(HANDLER_COMPLETE, location));
 		}
 	}

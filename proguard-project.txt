@@ -14,3 +14,37 @@
 -keepclassmembers class **.R$* {
     public static <fields>;
 }
+
+
+
+-libraryjars libs/android-support-v13.jar
+-libraryjars libs/umeng_sdk.jar
+-libraryjars libs/ormlite-android-4.42-SNAPSHOT.jar
+-libraryjars libs/ormlite-core-4.42-SNAPSHOT.jar
+-libraryjars libs/signpost-core-1.2.1.1.jar
+-libraryjars libs/tencent_openapi.jar
+-libraryjars libs/weibo.sdk.android.sso.jar
+
+-dontwarn android.support.**
+-dontwarn android.**
+-dontwarn sina.**
+-dontwarn weibo.**
+-dontwarn oauth.**
+-dontwarn com.google.**
+-dontwarn com.j256.**
+-dontwarn com.umeng.**
+-dontwarn com.tencent.**
+
+-keep class android.support.**{*;}
+-keep class android.** { *; }
+
+-keep class sina.** { *; }
+-keep class weibo.** { *; }
+-keep class oauth.** { *; }
+
+-keep class com.google.** { *; }
+-keep class com.j256.** { *; }
+-keep class com.umeng.**{*;}
+-keep class com.tencent.**{*;}
+
+-keep class org.apache.**{*;}

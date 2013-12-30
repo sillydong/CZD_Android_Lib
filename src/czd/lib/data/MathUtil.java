@@ -8,7 +8,7 @@ import android.view.MotionEvent;
 public class MathUtil {
 	@SuppressLint("DefaultLocale")
 	public static String percent(long current, long total) {
-		return String.format("%.2f%%", ((double) current / (double) total) * 100);
+		return String.format("%.2f%%", ((double)current / (double)total) * 100);
 	}
 
 	public static float distance(MotionEvent event) {
@@ -56,6 +56,6 @@ public class MathUtil {
 	}
 
 	public static float angle(float x1, float y1, float x2, float y2) {
-		return (float) Math.atan2(y2 - y1, x2 - x1);
+		return (float)Math.atan2(y2 - y1, x2 - x1);
 	}
 }

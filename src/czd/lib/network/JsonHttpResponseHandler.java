@@ -32,40 +32,48 @@ public class JsonHttpResponseHandler extends AsyncHttpResponseHandler {
 
 	@Override
 	protected void sendSuccessMessage(int statusCode, String responseBody) {
-		if (statusCode != HttpStatus.SC_NO_CONTENT) {
-			try {
+		if (statusCode != HttpStatus.SC_NO_CONTENT)
+		{
+			try
+			{
 				Object jsonResponse = parseResponse(responseBody);
-				sendMessage(obtainMessage(SUCCESS_JSON_MESSAGE, new Object[] { statusCode, jsonResponse }));
-			} catch (JSONException e) {
+				sendMessage(obtainMessage(SUCCESS_JSON_MESSAGE, new Object[]{statusCode, jsonResponse}));
+			} catch (JSONException e)
+			{
 				sendFailureMessage(e, responseBody);
 			}
 		}
-		else {
-			sendMessage(obtainMessage(SUCCESS_JSON_MESSAGE, new Object[] { statusCode, new JSONObject() }));
+		else
+		{
+			sendMessage(obtainMessage(SUCCESS_JSON_MESSAGE, new Object[]{statusCode, new JSONObject()}));
 		}
 	}
 
 	@Override
 	protected void handleMessage(Message msg) {
-		switch (msg.what) {
-		case SUCCESS_JSON_MESSAGE:
-			Object[] response = (Object[]) msg.obj;
-			handleSuccessJsonMessage(((Integer) response[0]).intValue(), response[1]);
-			break;
-		default:
-			super.handleMessage(msg);
+		switch (msg.what)
+		{
+			case SUCCESS_JSON_MESSAGE:
+				Object[] response = (Object[])msg.obj;
+				handleSuccessJsonMessage(((Integer)response[0]).intValue(), response[1]);
+				break;
+			default:
+				super.handleMessage(msg);
 		}
 	}
 
 	protected void handleSuccessJsonMessage(int statusCode, Object jsonResponse) {
-		if (jsonResponse instanceof JSONObject) {
-			onSuccess(statusCode, (JSONObject) jsonResponse);
+		if (jsonResponse instanceof JSONObject)
+		{
+			onSuccess(statusCode, (JSONObject)jsonResponse);
 		}
-		else if (jsonResponse instanceof JSONArray) {
-			onSuccess(statusCode, (JSONArray) jsonResponse);
+		else if (jsonResponse instanceof JSONArray)
+		{
+			onSuccess(statusCode, (JSONArray)jsonResponse);
 		}
-		else {
-			onFailure(new JSONException("Unexpected type " + jsonResponse.getClass().getName()),jsonResponse.toString());
+		else
+		{
+			onFailure(new JSONException("Unexpected type " + jsonResponse.getClass().getName()), jsonResponse.toString());
 		}
 	}
 
@@ -73,10 +81,12 @@ public class JsonHttpResponseHandler extends AsyncHttpResponseHandler {
 		Object result = null;
 		//trim the string to prevent start with blank, and test if the string is valid JSON, because the parser don't do this :(. If Json is not valid this will return null
 		responseBody = responseBody.trim();
-		if (responseBody.startsWith("{") || responseBody.startsWith("[")) {
+		if (responseBody.startsWith("{") || responseBody.startsWith("["))
+		{
 			result = new JSONTokener(responseBody).nextValue();
 		}
-		if (result == null) {
+		if (result == null)
+		{
 			result = responseBody;
 		}
 		return result;
@@ -84,23 +94,30 @@ public class JsonHttpResponseHandler extends AsyncHttpResponseHandler {
 
 	@Override
 	protected void handleFailureMessage(Throwable e, String responseBody) {
-		try {
-			if (responseBody != null) {
+		try
+		{
+			if (responseBody != null)
+			{
 				Object jsonResponse = parseResponse(responseBody);
-				if (jsonResponse instanceof JSONObject) {
-					onFailure(e, (JSONObject) jsonResponse);
+				if (jsonResponse instanceof JSONObject)
+				{
+					onFailure(e, (JSONObject)jsonResponse);
 				}
-				else if (jsonResponse instanceof JSONArray) {
-					onFailure(e, (JSONArray) jsonResponse);
+				else if (jsonResponse instanceof JSONArray)
+				{
+					onFailure(e, (JSONArray)jsonResponse);
 				}
-				else {
+				else
+				{
 					onFailure(e, responseBody);
 				}
 			}
-			else {
+			else
+			{
 				onFailure(e, "");
 			}
-		} catch (JSONException ex) {
+		} catch (JSONException ex)
+		{
 			onFailure(e, responseBody);
 		}
 	}

@@ -16,10 +16,12 @@ public class ActivityUtil {
 		hideTitleBar(activity);
 		Window window = activity.getWindow();
 		WindowManager.LayoutParams params = window.getAttributes();
-		if (full) {
+		if (full)
+		{
 			params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
 		}
-		else {
+		else
+		{
 			params.flags &= WindowManager.LayoutParams.FLAG_FULLSCREEN;
 		}
 		window.setAttributes(params);
@@ -45,7 +47,8 @@ public class ActivityUtil {
 	public static void switchActivity(Activity activity, Class<?> cls, boolean anim) {
 		Intent intent = new Intent(activity, cls);
 		activity.startActivity(intent);
-		if (anim) {
+		if (anim)
+		{
 			activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
 
 		}
@@ -53,7 +56,8 @@ public class ActivityUtil {
 
 	public static void switchActivity(Activity activity, Intent intent, boolean anim) {
 		activity.startActivity(intent);
-		if (anim) {
+		if (anim)
+		{
 			activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
 
 		}
@@ -61,18 +65,22 @@ public class ActivityUtil {
 
 	public static void switchActivityBack(Activity activity, boolean anim) {
 		activity.finish();
-		if (anim) {
+		if (anim)
+		{
 			activity.overridePendingTransition(R.anim.shift_left_in, R.anim.shift_right_out);
 		}
 	}
 
 	public static void switchActivityResult(Activity activity, int requestCode, Intent intent, boolean anim, boolean forward) {
 		activity.startActivityForResult(intent, requestCode);
-		if (anim) {
-			if (forward) {
+		if (anim)
+		{
+			if (forward)
+			{
 				activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
 			}
-			else {
+			else
+			{
 				activity.finish();
 				activity.overridePendingTransition(R.anim.shift_left_in, R.anim.shift_right_out);
 			}
