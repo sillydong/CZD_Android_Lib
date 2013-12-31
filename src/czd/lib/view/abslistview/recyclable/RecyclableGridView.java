@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.GridView;
-import czd.lib.view.absinterface.RecyclableItem;
 
 public class RecyclableGridView extends GridView implements OnScrollListener {
 	private OnScrollListener listener;

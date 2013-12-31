@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.ListView;
-import czd.lib.view.absinterface.RecyclableItem;
 
 public class RecyclableListView extends ListView implements OnScrollListener {
 	private OnScrollListener listener;

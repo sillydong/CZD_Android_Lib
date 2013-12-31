@@ -25,7 +25,6 @@ public class PullListView extends ListView implements OnScrollListener {
 
 	private boolean onTop = true, onBottom = true;
 
-	private Context _context;
 	private LinearLayout header;
 
 	private String _headerStatePull;
@@ -72,12 +71,10 @@ public class PullListView extends ListView implements OnScrollListener {
 		init(context, attrs);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void init(Context context, AttributeSet attrs) {
-		this._context = context;
 		if (attrs != null)
 		{
-			TypedArray tattrs = this._context.obtainStyledAttributes(attrs, R.styleable.PullView);
+			TypedArray tattrs = context.obtainStyledAttributes(attrs, R.styleable.PullView);
 			this._headerStatePull = tattrs.getString(0);
 			this._headerStateRelease = tattrs.getString(1);
 			this._headerStateLoading = tattrs.getString(2);
@@ -87,7 +84,7 @@ public class PullListView extends ListView implements OnScrollListener {
 			this._headerInfoVisible = tattrs.getInt(6, View.VISIBLE);
 			tattrs.recycle();
 		}
-		this.header = (LinearLayout)ViewUtil.viewById(this._context, R.layout.common_pull_header);
+		this.header = (LinearLayout)ViewUtil.viewById(context, R.layout.common_pull_header);
 		this.header_iv = (ImageView)this.header.findViewById(R.id.common_pull_header_image);
 		this.header_pb = (ProgressBar)this.header.findViewById(R.id.common_pull_header_progress);
 		this.header_stv = (TextView)this.header.findViewById(R.id.common_pull_header_state);

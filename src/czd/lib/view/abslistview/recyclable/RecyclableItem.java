@@ -1,4 +1,4 @@
-package czd.lib.view.absinterface;
+package czd.lib.view.abslistview.recyclable;
 
 /**
  * Created with IntelliJ IDEA.
