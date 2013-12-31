@@ -1,110 +1,83 @@
 package czd.lib.network;
 
 import android.content.Context;
-import android.os.Message;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 
-public abstract class SyncHttpClient extends AsyncHttpClient {
-	private int responseCode;
-	protected String result;
+/**
+ * Processes http requests in synchronous mode, so your caller thread will be blocked on each
+ * request
+ *
+ * @see com.loopj.android.http.AsyncHttpClient
+ */
+public class SyncHttpClient extends AsyncHttpClient {
 
-	protected AsyncHttpResponseHandler responseHandler = new AsyncHttpResponseHandler() {
+    /**
+     * Creates a new SyncHttpClient with default constructor arguments values
+     */
+    public SyncHttpClient() {
+        super(false, 80, 443);
+    }
 
-		void sendResponseMessage(org.apache.http.HttpResponse response) {
-			responseCode = response.getStatusLine().getStatusCode();
-			super.sendResponseMessage(response);
-		}
+    /**
+     * Creates a new SyncHttpClient.
+     *
+     * @param httpPort non-standard HTTP-only port
+     */
+    public SyncHttpClient(int httpPort) {
+        super(false, httpPort, 443);
+    }
 
-		;
+    /**
+     * Creates a new SyncHttpClient.
+     *
+     * @param httpPort  non-standard HTTP-only port
+     * @param httpsPort non-standard HTTPS-only port
+     */
+    public SyncHttpClient(int httpPort, int httpsPort) {
+        super(false, httpPort, httpsPort);
+    }
 
-		@Override
-		protected void sendMessage(Message msg) {
-			/*
-			 * Dont use the handler and send it directly to the analysis
-			 * (because its all the same thread)
-			 */
-			handleMessage(msg);
-		}
+    /**
+     * Creates new SyncHttpClient using given params
+     *
+     * @param fixNoHttpResponseException Whether to fix or not issue, by ommiting SSL verification
+     * @param httpPort                   HTTP port to be used, must be greater than 0
+     * @param httpsPort                  HTTPS port to be used, must be greater than 0
+     */
+    public SyncHttpClient(boolean fixNoHttpResponseException, int httpPort, int httpsPort) {
+        super(fixNoHttpResponseException, httpPort, httpsPort);
+    }
 
-		@Override
-		public void onSuccess(String content) {
-			result = content;
-		}
+    /**
+     * Creates a new SyncHttpClient.
+     *
+     * @param schemeRegistry SchemeRegistry to be used
+     */
+    public SyncHttpClient(SchemeRegistry schemeRegistry) {
+        super(schemeRegistry);
+    }
 
-		@Override
-		public void onFailure(Throwable error, String content) {
-			result = onRequestFailed(error, content);
-		}
-	};
+    @Override
+    protected RequestHandle sendRequest(DefaultHttpClient client,
+                                        HttpContext httpContext, HttpUriRequest uriRequest,
+                                        String contentType, ResponseHandlerInterface responseHandler,
+                                        Context context) {
+        if (contentType != null) {
+            uriRequest.addHeader("Content-Type", contentType);
+        }
 
-	public int getResponseCode() {
-		return responseCode;
-	}
-
-	// Private stuff
-	protected void sendRequest(DefaultHttpClient client, HttpContext httpContext, HttpUriRequest uriRequest, String contentType, AsyncHttpResponseHandler responseHandler, Context context) {
-		if (contentType != null)
-		{
-			uriRequest.addHeader("Content-Type", contentType);
-		}
+        responseHandler.setUseSynchronousMode(true);
 
 		/*
-		 * will execute the request directly
-		 */
-		new AsyncHttpRequest(client, httpContext, uriRequest, responseHandler).run();
-	}
+         * will execute the request directly
+		*/
+        new AsyncHttpRequest(client, httpContext, uriRequest, responseHandler).run();
 
-	public abstract String onRequestFailed(Throwable error, String content);
-
-	public void delete(String url, RequestParams queryParams, AsyncHttpResponseHandler responseHandler) {
-		// TODO what about query params??
-		delete(url, responseHandler);
-	}
-
-	public String get(String url, RequestParams params) {
-		this.get(url, params, responseHandler);
-		/*
-		 * the response handler will have set the result when this line is
-		 * reached
-		 */
-		return result;
-	}
-
-	public String get(String url) {
-		this.get(url, null, responseHandler);
-		return result;
-	}
-
-	public String put(String url, RequestParams params) {
-		this.put(url, params, responseHandler);
-		return result;
-	}
-
-	public String put(String url) {
-		this.put(url, null, responseHandler);
-		return result;
-	}
-
-	public String post(String url, RequestParams params) {
-		this.post(url, params, responseHandler);
-		return result;
-	}
-
-	public String post(String url) {
-		this.post(url, null, responseHandler);
-		return result;
-	}
-
-	public String delete(String url, RequestParams params) {
-		this.delete(url, params, responseHandler);
-		return result;
-	}
-
-	public String delete(String url) {
-		this.delete(url, null, responseHandler);
-		return result;
-	}
-
+        // Return a Request Handle that cannot be used to cancel the request
+        // because it is already complete by the time this returns
+        return new RequestHandle(null);
+    }
 }

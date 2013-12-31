@@ -40,7 +40,7 @@ public class FileCache extends AbsFileCache<Object> implements CacheI<Object> {
 					oos.writeObject(value);
 					oos.flush();
 					oos.close();
-					FileUtil.writeFile(file, baos.toByteArray());
+					FileUtil.write(file, baos.toByteArray());
 				} catch (IOException e)
 				{
 					e.printStackTrace();
@@ -58,7 +58,7 @@ public class FileCache extends AbsFileCache<Object> implements CacheI<Object> {
 		{
 			try
 			{
-				byte[] data = FileUtil.readFile(file);
+				byte[] data = FileUtil.read(file);
 				ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
 				Object obj = ois.readObject();
 				ois.close();

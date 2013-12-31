@@ -13,9 +13,8 @@ public class StreamUtil {
 				String line = null;
 				while ((line = reader.readLine()) != null)
 				{
-					sb.append(line + "\n");
+					sb.append(line).append("\n");
 				}
-				is.close();
 				return sb.toString();
 			} catch (IOException e)
 			{

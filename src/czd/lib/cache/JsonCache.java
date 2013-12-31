@@ -39,7 +39,7 @@ public class JsonCache extends FileCache {
 			writer.execute(new Runnable() {
 				@Override
 				public void run() {
-					FileUtil.writeFile(file, ((JSONObject)value).toString().getBytes());
+					FileUtil.write(file, ((JSONObject)value).toString().getBytes());
 				}
 			});
 		}
@@ -49,7 +49,7 @@ public class JsonCache extends FileCache {
 			writer.execute(new Runnable() {
 				@Override
 				public void run() {
-					FileUtil.writeFile(file, ((JSONArray)value).toString().getBytes());
+					FileUtil.write(file, ((JSONArray)value).toString().getBytes());
 				}
 			});
 		}
@@ -62,7 +62,7 @@ public class JsonCache extends FileCache {
 	@Override
 	public Object get(String key) {
 		File file = new File(this.path + this.name, genKey(key));
-		String data = new String(FileUtil.readFile(file));
+		String data = new String(FileUtil.read(file));
 		if (data.startsWith("{") || data.startsWith("["))
 		{
 			try

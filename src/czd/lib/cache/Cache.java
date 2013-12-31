@@ -68,7 +68,7 @@ abstract class AbsFileCache<T> implements CacheI<T> {
 	public void clean() {
 		File file = new File(this.path + this.name);
 		if (file.exists() && file.isDirectory())
-			FileUtil.deleteFile(file);
+			FileUtil.rm(file);
 	}
 
 	@Override

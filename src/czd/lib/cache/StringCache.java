@@ -33,7 +33,7 @@ public class StringCache extends AbsFileCache<String> implements CacheI<String> 
 			public void run() {
 				if (file.exists() && file.isFile())
 					file.delete();
-				FileUtil.writeFile(file, value.getBytes());
+				FileUtil.write(file, value.getBytes());
 			}
 		});
 		return true;
@@ -41,6 +41,6 @@ public class StringCache extends AbsFileCache<String> implements CacheI<String> 
 
 	@Override
 	public String get(String key) {
-		return new String(FileUtil.readFile(genFile(key)));
+		return new String(FileUtil.read(genFile(key)));
 	}
 }

@@ -14,7 +14,7 @@ public class MD5 {
 			MessageDigest md5 = MessageDigest.getInstance("MD5");
 			md5.reset();
 			md5.update(toencode);
-			return new String(Hex.encodeHex(toencode, false));
+			return Hex.toString(toencode);
 		} catch (NoSuchAlgorithmException e)
 		{
 			e.printStackTrace();
