@@ -2,7 +2,7 @@ package czd.lib.view.scrollview.pull;
 
 import android.view.ViewGroup;
 
-public interface PullScrollListener{
+public interface PullScrollListener {
 	public void onRefresh();
 
 	public abstract void onScroll(ViewGroup view, int l, int t, int oldl, int oldt);

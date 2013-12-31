@@ -12,8 +12,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * Time: 上午11:57
  */
 public class MemCache implements CacheI<Object> {
+	protected static MemCache instance;
 	protected ConcurrentHashMap<String,SoftReference<Object>> mem;
+	
+	public MemCache(){
+		mem=new ConcurrentHashMap<String,SoftReference<Object>>();
+	}
 
+	public static MemCache getInstance(){
+		if(instance==null)
+			instance=new MemCache();
+		return instance;
+	}
+	
 	@Override
 	public boolean save(String key, Object value) {
 		mem.put(genKey(key), new SoftReference<Object>(value));

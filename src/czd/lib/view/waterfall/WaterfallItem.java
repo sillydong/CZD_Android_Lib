@@ -3,7 +3,7 @@ package czd.lib.view.waterfall;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 
-public abstract interface WaterfallItem{
+public abstract interface WaterfallItem {
 
 	int m_un = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 	int m_mo = MeasureSpec.makeMeasureSpec(0, MeasureSpec.AT_MOST);

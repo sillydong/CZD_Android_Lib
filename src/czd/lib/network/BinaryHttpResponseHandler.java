@@ -50,75 +50,78 @@ import java.util.regex.PatternSyntaxException;
  */
 public abstract class BinaryHttpResponseHandler extends AsyncHttpResponseHandler {
 
-    private static final String LOG_TAG = "BinaryHttpResponseHandler";
+	private static final String LOG_TAG = "BinaryHttpResponseHandler";
 
-    private String[] mAllowedContentTypes = new String[]{
-            "image/jpeg",
-            "image/png"
-    };
+	private String[] mAllowedContentTypes = new String[]{"image/jpeg", "image/png"};
 
-    /**
-     * Method can be overriden to return allowed content types, can be sometimes better than passing
-     * data in constructor
-     *
-     * @return array of content-types or Pattern string templates (eg. '.*' to match every response)
-     */
-    public String[] getAllowedContentTypes() {
-        return mAllowedContentTypes;
-    }
+	/**
+	 * Method can be overriden to return allowed content types, can be sometimes better than passing
+	 * data in constructor
+	 *
+	 * @return array of content-types or Pattern string templates (eg. '.*' to match every response)
+	 */
+	public String[] getAllowedContentTypes() {
+		return mAllowedContentTypes;
+	}
 
-    /**
-     * Creates a new BinaryHttpResponseHandler
-     */
-    public BinaryHttpResponseHandler() {
-        super();
-    }
+	/**
+	 * Creates a new BinaryHttpResponseHandler
+	 */
+	public BinaryHttpResponseHandler() {
+		super();
+	}
 
-    /**
-     * Creates a new BinaryHttpResponseHandler, and overrides the default allowed content types with
-     * passed String array (hopefully) of content types.
-     *
-     * @param allowedContentTypes content types array, eg. 'image/jpeg' or pattern '.*'
-     */
-    public BinaryHttpResponseHandler(String[] allowedContentTypes) {
-        super();
-        if (allowedContentTypes != null)
-            mAllowedContentTypes = allowedContentTypes;
-        else
-            Log.e(LOG_TAG, "Constructor passed allowedContentTypes was null !");
-    }
+	/**
+	 * Creates a new BinaryHttpResponseHandler, and overrides the default allowed content types with
+	 * passed String array (hopefully) of content types.
+	 *
+	 * @param allowedContentTypes content types array, eg. 'image/jpeg' or pattern '.*'
+	 */
+	public BinaryHttpResponseHandler(String[] allowedContentTypes) {
+		super();
+		if (allowedContentTypes != null)
+			mAllowedContentTypes = allowedContentTypes;
+		else
+			Log.e(LOG_TAG, "Constructor passed allowedContentTypes was null !");
+	}
 
-    @Override
-    public abstract void onSuccess(int statusCode, Header[] headers, byte[] binaryData);
+	@Override
+	public abstract void onSuccess(int statusCode, Header[] headers, byte[] binaryData);
 
-    @Override
-    public abstract void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error);
+	@Override
+	public abstract void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error);
 
-    @Override
-    public final void sendResponseMessage(HttpResponse response) throws IOException {
-        StatusLine status = response.getStatusLine();
-        Header[] contentTypeHeaders = response.getHeaders("Content-Type");
-        if (contentTypeHeaders.length != 1) {
-            //malformed/ambiguous HTTP Header, ABORT!
-            sendFailureMessage(status.getStatusCode(), response.getAllHeaders(), null, new HttpResponseException(status.getStatusCode(), "None, or more than one, Content-Type Header found!"));
-            return;
-        }
-        Header contentTypeHeader = contentTypeHeaders[0];
-        boolean foundAllowedContentType = false;
-        for (String anAllowedContentType : getAllowedContentTypes()) {
-            try {
-                if (Pattern.matches(anAllowedContentType, contentTypeHeader.getValue())) {
-                    foundAllowedContentType = true;
-                }
-            } catch (PatternSyntaxException e) {
-                Log.e("BinaryHttpResponseHandler", "Given pattern is not valid: " + anAllowedContentType, e);
-            }
-        }
-        if (!foundAllowedContentType) {
-            //Content-Type not in allowed list, ABORT!
-            sendFailureMessage(status.getStatusCode(), response.getAllHeaders(), null, new HttpResponseException(status.getStatusCode(), "Content-Type not allowed!"));
-            return;
-        }
-        super.sendResponseMessage(response);
-    }
+	@Override
+	public final void sendResponseMessage(HttpResponse response) throws IOException {
+		StatusLine status = response.getStatusLine();
+		Header[] contentTypeHeaders = response.getHeaders("Content-Type");
+		if (contentTypeHeaders.length != 1)
+		{
+			//malformed/ambiguous HTTP Header, ABORT!
+			sendFailureMessage(status.getStatusCode(), response.getAllHeaders(), null, new HttpResponseException(status.getStatusCode(), "None, or more than one, Content-Type Header found!"));
+			return;
+		}
+		Header contentTypeHeader = contentTypeHeaders[0];
+		boolean foundAllowedContentType = false;
+		for (String anAllowedContentType : getAllowedContentTypes())
+		{
+			try
+			{
+				if (Pattern.matches(anAllowedContentType, contentTypeHeader.getValue()))
+				{
+					foundAllowedContentType = true;
+				}
+			} catch (PatternSyntaxException e)
+			{
+				Log.e("BinaryHttpResponseHandler", "Given pattern is not valid: " + anAllowedContentType, e);
+			}
+		}
+		if (!foundAllowedContentType)
+		{
+			//Content-Type not in allowed list, ABORT!
+			sendFailureMessage(status.getStatusCode(), response.getAllHeaders(), null, new HttpResponseException(status.getStatusCode(), "Content-Type not allowed!"));
+			return;
+		}
+		super.sendResponseMessage(response);
+	}
 }

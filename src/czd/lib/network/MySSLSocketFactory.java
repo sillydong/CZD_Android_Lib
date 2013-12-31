@@ -15,64 +15,62 @@ import java.security.*;
  * certificate validation on every device, use with caution
  */
 public class MySSLSocketFactory extends SSLSocketFactory {
-    SSLContext sslContext = SSLContext.getInstance("TLS");
+	SSLContext sslContext = SSLContext.getInstance("TLS");
 
-    public MySSLSocketFactory(KeyStore truststore)
-            throws NoSuchAlgorithmException, KeyManagementException,
-            KeyStoreException, UnrecoverableKeyException {
-        super(truststore);
+	public MySSLSocketFactory(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+		super(truststore);
 
-        TrustManager tm = new X509TrustManager() {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                return null;
-            }
+		TrustManager tm = new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
 
-            @Override
-            public void checkClientTrusted(
-                    java.security.cert.X509Certificate[] chain, String authType)
-                    throws java.security.cert.CertificateException {
-            }
+			@Override
+			public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+			}
 
-            @Override
-            public void checkServerTrusted(
-                    java.security.cert.X509Certificate[] chain, String authType)
-                    throws java.security.cert.CertificateException {
-            }
-        };
-        sslContext.init(null, new TrustManager[]{tm}, null);
-    }
+			@Override
+			public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+			}
+		};
+		sslContext.init(null, new TrustManager[]{tm}, null);
+	}
 
-    @Override
-    public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
-        return sslContext.getSocketFactory().createSocket(socket, host, port, autoClose);
-    }
+	@Override
+	public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
+		return sslContext.getSocketFactory().createSocket(socket, host, port, autoClose);
+	}
 
-    @Override
-    public Socket createSocket() throws IOException {
-        return sslContext.getSocketFactory().createSocket();
-    }
+	@Override
+	public Socket createSocket() throws IOException {
+		return sslContext.getSocketFactory().createSocket();
+	}
 
-    public static KeyStore getKeystore() {
-        KeyStore trustStore = null;
-        try {
-            trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            trustStore.load(null, null);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-        return trustStore;
-    }
+	public static KeyStore getKeystore() {
+		KeyStore trustStore = null;
+		try
+		{
+			trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+			trustStore.load(null, null);
+		} catch (Throwable t)
+		{
+			t.printStackTrace();
+		}
+		return trustStore;
+	}
 
-    public static SSLSocketFactory getFixedSocketFactory() {
-        SSLSocketFactory socketFactory;
-        try {
-            socketFactory = new MySSLSocketFactory(getKeystore());
-            socketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
-        } catch (Throwable t) {
-            t.printStackTrace();
-            socketFactory = SSLSocketFactory.getSocketFactory();
-        }
-        return socketFactory;
-    }
+	public static SSLSocketFactory getFixedSocketFactory() {
+		SSLSocketFactory socketFactory;
+		try
+		{
+			socketFactory = new MySSLSocketFactory(getKeystore());
+			socketFactory.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+		} catch (Throwable t)
+		{
+			t.printStackTrace();
+			socketFactory = SSLSocketFactory.getSocketFactory();
+		}
+		return socketFactory;
+	}
 
 }
