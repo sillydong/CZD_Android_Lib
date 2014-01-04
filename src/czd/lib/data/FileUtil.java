@@ -42,7 +42,7 @@ public class FileUtil {
 
 	public static long getSize(File path) {
 		long size = 0L;
-		if (path.isDirectory())
+		if (path.exists() && path.isDirectory())
 		{
 			File[] files = path.listFiles();
 			for (File file : files)
@@ -50,7 +50,7 @@ public class FileUtil {
 				size += getSize(file);
 			}
 		}
-		else
+		else if(path.exists() && path.isFile())
 		{
 			try
 			{
