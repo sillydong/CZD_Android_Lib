@@ -39,6 +39,13 @@ public class PreferenceUtil {
 		edit.commit();
 	}
 
+	public static void writeLongPreference(Context context, String name, String tag, long towrite) {
+		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+		Editor edit = sp.edit();
+		edit.putLong(tag, towrite);
+		edit.commit();
+	}
+
 	public static void writeFloatPreference(Context context, String name, String tag, float towrite) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
 		Editor edit = sp.edit();
@@ -104,6 +111,16 @@ public class PreferenceUtil {
 		}
 	}
 
+	public static void deletePreference(Context context, String name, String key) {
+		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+		if (sp != null)
+		{
+			Editor editor = sp.edit();
+			editor.remove(key);
+			editor.commit();
+		}
+	}
+
 	/**
 	 * get SharedPreferences by name
 	 *
@@ -128,7 +145,7 @@ public class PreferenceUtil {
 	 */
 	public static String getStringPreference(Context context, String name, String tag) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-		return sp.getString(tag, "");
+		return sp != null ? sp.getString(tag, "") : "";
 	}
 
 	/**
@@ -140,7 +157,12 @@ public class PreferenceUtil {
 	 */
 	public static int getIntPreference(Context context, String name, String tag) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-		return sp.getInt(tag, 0);
+		return sp != null ? sp.getInt(tag, 0) : 0;
+	}
+
+	public static long getLongPreference(Context context, String name, String tag) {
+		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+		return sp != null ? sp.getLong(tag, 0L) : 0L;
 	}
 
 	/**
@@ -152,11 +174,11 @@ public class PreferenceUtil {
 	 */
 	public static boolean getBooleanPreference(Context context, String name, String tag, boolean defValue) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-		return sp.getBoolean(tag, defValue);
+		return sp != null && sp.getBoolean(tag, defValue);
 	}
 
 	public static float getFloatPreference(Context context, String name, String tag) {
 		SharedPreferences sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-		return sp.getFloat(tag, 0);
+		return sp != null ? sp.getFloat(tag, 0F) : 0F;
 	}
 }
