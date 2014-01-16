@@ -23,6 +23,4 @@ public abstract interface WaterfallItem {
 
 	public abstract Object getData();
 
-	public abstract void setData();
-
 }

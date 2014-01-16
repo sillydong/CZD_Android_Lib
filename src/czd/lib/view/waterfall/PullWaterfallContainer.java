@@ -20,10 +20,10 @@ import czd.lib.view.ViewUtil;
 import czd.lib.view.progress.LoadingFooter;
 
 public class PullWaterfallContainer extends AbstractWaterfallContainer {
-	private static final int STATE_RELEASETOREFRESH = 0;
-	private static final int STATE_PULLTOREFRESH = 1;
-	private static final int STATE_REFRESHING = 2;
-	private static final int STATE_DONE = 3;
+	public static final int STATE_RELEASETOREFRESH = 0;
+	public static final int STATE_PULLTOREFRESH = 1;
+	public static final int STATE_REFRESHING = 2;
+	public static final int STATE_DONE = 3;
 
 	private static final int RATIO = 2;
 
@@ -102,7 +102,8 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 								case STATE_RELEASETOREFRESH:
 									state = STATE_REFRESHING;
 									resetHeader();
-									onRefresh();
+									if (scroll_listener != null)
+										scroll_listener.onRefresh();
 									break;
 								default:
 									break;
@@ -175,7 +176,6 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 		return super.onTouchEvent(event);
 	}
 
-	@SuppressWarnings("deprecation")
 	private void preInit(Context context, AttributeSet attrs) {
 		if (attrs != null)
 		{
@@ -224,18 +224,19 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 		super.onScrollChanged(l, t, oldl, oldt);
 	}
 
-	public void onRefreshComplete() {
+	public void setHeaderDone() {
 		state = STATE_DONE;
 		resetHeader();
 		invalidate();
 		scrollTo(0, 0);
 	}
 
-	private void onRefresh() {
-		if (scroll_listener != null)
-		{
-			scroll_listener.onRefresh();
-		}
+	public void setHeaderVisible(int visible) {
+		this.header_itv.setVisibility(visible);
+	}
+	
+	public int getHeaderState() {
+		return state;
 	}
 
 	private void resetHeader() {
@@ -287,9 +288,19 @@ public class PullWaterfallContainer extends AbstractWaterfallContainer {
 		}
 	}
 
-	public void setHeaderInfoVisible(int visible) {
-		this.header_itv.setVisibility(visible);
+	public void setFooterDone(){
+		((LoadingFooter)footer).done();
 	}
+	
+	public void setFooterNomore(String info){
+		((LoadingFooter)footer).nomore(info);
+	}
+	
+	public void setFooterLoading(String info){
+		((LoadingFooter)footer).loading(info);
+	}
+	
+	
 
 	@Override
 	public void setScrollListener(WaterfallScrollListener listener) {

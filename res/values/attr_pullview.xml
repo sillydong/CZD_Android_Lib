@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <declare-styleable name="PullView">
-        <attr name="pHeaderStatePull" format="string" />
-        <attr name="pHeaderStateRelease" format="string" />
-        <attr name="pHeaderStateLoading" format="string" />
-        <attr name="pHeaderStateDone" format="string" />
-        <attr name="pHeaderBackground" format="reference|color" />
-        <attr name="pHeaderTextColor" format="reference|color" />
-        <attr name="pHeaderInfoVisible">
-            <enum name="gone" value="8" />
-            <enum name="visible" value="0" />
-            <enum name="invisible" value="4" />
-        </attr>
-    </declare-styleable>
+	<declare-styleable name="PullView">
+		<attr name="pHeaderStatePull" format="string"/>
+		<attr name="pHeaderStateRelease" format="string"/>
+		<attr name="pHeaderStateLoading" format="string"/>
+		<attr name="pHeaderStateDone" format="string"/>
+		<attr name="pHeaderBackground" format="reference|color"/>
+		<attr name="pHeaderTextColor" format="reference|color"/>
+		<attr name="pHeaderInfoVisible">
+			<enum name="gone" value="8"/>
+			<enum name="visible" value="0"/>
+			<enum name="invisible" value="4"/>
+		</attr>
+	</declare-styleable>
 
 </resources>

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:fillAfter="true"
-    android:fillBefore="false"
-    android:fillEnabled="true"
-    android:interpolator="@anim/anim_interpolator"
-    android:shareInterpolator="true"
-    android:zAdjustment="normal" >
+	 android:fillAfter="true"
+	 android:fillBefore="false"
+	 android:fillEnabled="true"
+	 android:interpolator="@anim/anim_interpolator"
+	 android:shareInterpolator="true"
+	 android:zAdjustment="normal">
 
-    <translate
-        android:duration="500"
-        android:fromYDelta="0.0%p"
-        android:toYDelta="129.996%p" />
+	<translate
+			android:duration="500"
+			android:fromYDelta="0.0%p"
+			android:toYDelta="129.996%p"/>
 
 </set>

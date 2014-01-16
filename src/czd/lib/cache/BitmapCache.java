@@ -2,6 +2,7 @@ package czd.lib.cache;
 
 import android.graphics.Bitmap;
 import czd.lib.data.ImageUtil;
+import czd.lib.encode.MD5;
 
 import java.io.File;
 import java.lang.ref.SoftReference;
@@ -47,6 +48,11 @@ public class BitmapCache extends AbsFileCache<Bitmap> implements CacheI<Bitmap> 
 	}
 
 	@Override
+	public long gettime(String key) {
+		return 0;
+	}
+
+	@Override
 	public boolean exists(String key) {
 		if (mem.containsKey(this.name + genKey(key)))
 			return true;
@@ -61,7 +67,14 @@ public class BitmapCache extends AbsFileCache<Bitmap> implements CacheI<Bitmap> 
 		File file = genFile(key);
 		if (file.exists() && file.isFile() && file.canRead())
 		{
-			return ImageUtil.getBitmapFromFile(file);
+			try
+			{
+				return ImageUtil.getBitmapFromFile(file);
+			} catch (OutOfMemoryError e)
+			{
+				return null;
+			}
+
 		}
 		return null;
 	}
@@ -69,7 +82,7 @@ public class BitmapCache extends AbsFileCache<Bitmap> implements CacheI<Bitmap> 
 	@Override
 	public boolean delete(String key) {
 		mem.remove(this.name + genKey(key));
-		return super.exists(key);
+		return super.delete(key);
 	}
 
 	@Override
@@ -89,8 +102,27 @@ public class BitmapCache extends AbsFileCache<Bitmap> implements CacheI<Bitmap> 
 		File file = genFile(key);
 		if (file.exists() && file.isFile() && file.canRead())
 		{
-			return ImageUtil.getBitmapFromFile(file, width, height);
+			try
+			{
+				return ImageUtil.getBitmapFromFile(file, width, height);
+			} catch (OutOfMemoryError e)
+			{
+				return null;
+			}
 		}
 		return null;
+	}
+
+	@Override
+	public String genKey(String key) {
+		return MD5.encode(key.getBytes(), true);
+	}
+
+	protected File genFile(String key) {
+		String name = genKey(key);
+		File file = new File(this.path + this.name + "/" + name.substring(0, 1) + "/" + name);
+		if (!file.getParentFile().exists())
+			file.getParentFile().mkdirs();
+		return file;
 	}
 }

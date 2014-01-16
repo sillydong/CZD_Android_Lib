@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Locale;
 
@@ -20,6 +22,10 @@ public class FileUtil {
 
 	public static final long EXPIRE_DATES = 3;
 	public static final int MB = 1024;
+	public static final int COPY_MBB = 1;
+	public static final int COPY_CHANNEL = 2;
+	public static final int COPY_STREAM = 3;
+	public static final int COPY_BUFFER = 4;
 
 	/**
 	 * return available space in SD card
@@ -50,7 +56,7 @@ public class FileUtil {
 				size += getSize(file);
 			}
 		}
-		else if(path.exists() && path.isFile())
+		else if (path.exists() && path.isFile())
 		{
 			try
 			{
@@ -65,11 +71,6 @@ public class FileUtil {
 		return size;
 	}
 
-	/**
-	 * change the file's last modify time
-	 *
-	 * @param filepath
-	 */
 	public static void setFileLastModifyTime(File file) {
 		if (file.exists() && file.canWrite())
 		{
@@ -78,11 +79,6 @@ public class FileUtil {
 		}
 	}
 
-	/**
-	 * remove expired files in a directory
-	 *
-	 * @param filedir directory to clean
-	 */
 	public static void removeExpiredFile(final File filedir) {
 		new Thread() {
 			@Override
@@ -196,7 +192,7 @@ public class FileUtil {
 		return type;
 	}
 
-	public static boolean copy(File source, File target) {
+	public synchronized static boolean copy(final File source, final File target, final int method) {
 		if (source != null && source.canRead())
 		{
 			if (source.isDirectory())
@@ -210,37 +206,119 @@ public class FileUtil {
 				{
 					for (File tmp_file : files)
 					{
-						copy(tmp_file, new File(target, tmp_file.getName()));
+						if (!copy(tmp_file, new File(target, tmp_file.getName()), method))
+							return false;
 					}
+					return true;
 				}
 			}
 			else
 			{
-				try
-				{
-					FileInputStream fis = new FileInputStream(source);
-					FileOutputStream fos = new FileOutputStream(target);
-					FileChannel fci = fis.getChannel();
-					FileChannel fco = fos.getChannel();
-					int length = 2097152;
-					fci.position(0);
-					while (true)
-					{
-						if (fci.position() == fci.size())
+				new Thread() {
+					@Override
+					public void run() {
+						super.run();
+						try
 						{
-							fci.close();
-							fco.close();
-							return true;
+							FileInputStream fis = new FileInputStream(source);
+							FileOutputStream fos = new FileOutputStream(target);
+							switch (method)
+							{
+								case COPY_MBB:
+									FileChannel fci_mbb = fis.getChannel();
+									FileChannel fco_mbb = fos.getChannel();
+									int length_mbb = 2097152;
+									fci_mbb.position(0);
+									MappedByteBuffer mbbi_mbb;
+									MappedByteBuffer mbbo_mbb;
+									while (fci_mbb.position() < fci_mbb.size())
+									{
+										length_mbb = Math.min(length_mbb, (int)(fci_mbb.size() - fci_mbb.position()));
+										mbbi_mbb = fci_mbb.map(FileChannel.MapMode.READ_ONLY, fci_mbb.position(), length_mbb);
+										mbbo_mbb = fco_mbb.map(FileChannel.MapMode.READ_WRITE, fco_mbb.size(), length_mbb);
+										fci_mbb.position(fci_mbb.position() + length_mbb);
+										mbbo_mbb.put(mbbi_mbb);
+										mbbi_mbb.clear();
+										mbbo_mbb.clear();
+									}
+									fci_mbb.close();
+									fco_mbb.force(true);
+									fco_mbb.close();
+									break;
+								case COPY_CHANNEL:
+									FileChannel fci_ch = fis.getChannel();
+									FileChannel fco_ch = fos.getChannel();
+									int length_ch = 2097152;
+									fci_ch.position(0);
+									while (fci_ch.position() < fci_ch.size())
+									{
+										length_ch = Math.min(length_ch, (int)(fci_ch.size() - fci_ch.position()));
+										fci_ch.transferTo(fci_ch.position(), length_ch, fco_ch);
+										fci_ch.position(fci_ch.position() + length_ch);
+									}
+									fci_ch.close();
+									fco_ch.force(true);
+									fco_ch.close();
+									break;
+								case COPY_BUFFER:
+									FileChannel fci_bf = fis.getChannel();
+									FileChannel fco_bf = fos.getChannel();
+									ByteBuffer bbuffer = ByteBuffer.allocateDirect(4096);
+									int b = 0;
+									while ((b = fci_bf.read(bbuffer)) != -1)
+									{
+										bbuffer.flip();
+										fco_bf.write(bbuffer);
+									}
+									fci_bf.close();
+									fco_bf.force(true);
+									fco_bf.close();
+									break;
+								case COPY_STREAM:
+									byte[] buffer = new byte[4096];
+									int s = 0;
+									while ((s = fis.read(buffer)) != -1)
+									{
+										fos.write(buffer);
+									}
+									break;
+							}
+							fis.close();
+							fos.flush();
+							fos.close();
+						} catch (Exception e)
+						{
+							e.printStackTrace();
 						}
-						length = Math.min(length, (int)(fci.size() - fci.position()));
-						fci.transferTo(fci.position(), length, fco);
-						fci.position(fci.position() + length);
 					}
-				} catch (IOException e)
-				{
-					e.printStackTrace();
-				}
+				}.run();
+				return true;
 			}
+		}
+		return false;
+	}
+
+	public static boolean copy(File source, File target) {
+
+		try
+		{
+			FileInputStream fis = new FileInputStream(source);
+			FileOutputStream fos = new FileOutputStream(target);
+
+			byte[] buffer = new byte[4096];
+			int s = 0;
+			while ((s = fis.read(buffer)) != -1)
+			{
+				fos.write(buffer);
+			}
+
+			fis.close();
+			fos.flush();
+			fos.close();
+			return true;
+		} catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 		return false;
 	}

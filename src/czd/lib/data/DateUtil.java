@@ -7,13 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtil {
-	/**
-	 * Format String like "yyyy-MM-dd" into Date
-	 *
-	 * @param date the date string
-	 *
-	 * @return Date
-	 */
+
 	public static Date str2date(String date, String format) {
 		DateFormat f = new SimpleDateFormat(format);
 		try
@@ -125,26 +119,10 @@ public class DateUtil {
 		}
 	}
 
-	/**
-	 * plus months to a date
-	 *
-	 * @param begin to be plused
-	 * @param month day to plus
-	 *
-	 * @return String
-	 */
 	public static String dateplusm(String begin, int day, String format) {
 		return DateUtil.date2str(DateUtil.dateplusm(DateUtil.str2date(begin, format), day));
 	}
 
-	/**
-	 * plus years to a date
-	 *
-	 * @param begin to be plused
-	 * @param month day to plus
-	 *
-	 * @return Date
-	 */
 	public static Date dateplusy(Date begin, int year) {
 		if (begin != null)
 		{
@@ -159,14 +137,6 @@ public class DateUtil {
 		}
 	}
 
-	/**
-	 * plus years to a date
-	 *
-	 * @param begin to be plused
-	 * @param month day to plus
-	 *
-	 * @return String
-	 */
 	public static String dateplusy(String begin, int day, String format) {
 		return DateUtil.date2str(DateUtil.dateplusy(DateUtil.str2date(begin, format), day));
 	}
@@ -182,16 +152,16 @@ public class DateUtil {
 		}
 	}
 
-	public static Date timetostr(long timestamp, String format) {
+	public static String timetostr(long timestamp, String format) {
 		SimpleDateFormat f = new SimpleDateFormat(format);
-		try
-		{
-			return f.parse(f.format(timestamp));
-		} catch (ParseException e)
-		{
-			e.printStackTrace();
-			return null;
-		}
+		return f.format(new Date(timestamp));
 	}
 
+	public static long getCurrentMillis() {
+		return System.currentTimeMillis();
+	}
+
+	public static long getCurrentSeconds() {
+		return Integer.parseInt(System.currentTimeMillis() / 1000 + "");
+	}
 }

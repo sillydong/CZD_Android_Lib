@@ -17,13 +17,9 @@ public class ActivityUtil {
 		Window window = activity.getWindow();
 		WindowManager.LayoutParams params = window.getAttributes();
 		if (full)
-		{
 			params.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-		}
 		else
-		{
 			params.flags &= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-		}
 		window.setAttributes(params);
 		window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 	}
@@ -48,27 +44,19 @@ public class ActivityUtil {
 		Intent intent = new Intent(activity, cls);
 		activity.startActivity(intent);
 		if (anim)
-		{
 			activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
-
-		}
 	}
 
 	public static void switchActivity(Activity activity, Intent intent, boolean anim) {
 		activity.startActivity(intent);
 		if (anim)
-		{
 			activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
-
-		}
 	}
 
 	public static void switchActivityBack(Activity activity, boolean anim) {
 		activity.finish();
 		if (anim)
-		{
 			activity.overridePendingTransition(R.anim.shift_left_in, R.anim.shift_right_out);
-		}
 	}
 
 	public static void switchActivityResult(Activity activity, int requestCode, Intent intent, boolean anim, boolean forward) {
@@ -76,9 +64,7 @@ public class ActivityUtil {
 		if (anim)
 		{
 			if (forward)
-			{
 				activity.overridePendingTransition(R.anim.shift_right_in, R.anim.shift_left_out);
-			}
 			else
 			{
 				activity.finish();

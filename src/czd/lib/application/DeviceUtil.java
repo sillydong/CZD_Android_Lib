@@ -22,26 +22,18 @@ public class DeviceUtil {
 		State mobile = manager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 		State wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
 		if (wifi == State.CONNECTED || mobile == State.CONNECTED)
-		{
 			return true;
-		}
 		else
-		{
 			return false;
-		}
 	}
 
 	public static boolean isWIFIConnected() {
 		ConnectivityManager manager = (ConnectivityManager)ApplicationUtil.application_context.getSystemService(Context.CONNECTIVITY_SERVICE);
 		State wifi = manager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
 		if (wifi == State.CONNECTED)
-		{
 			return true;
-		}
 		else
-		{
 			return false;
-		}
 	}
 
 	public static boolean isWIFIActive() {
@@ -60,26 +52,16 @@ public class DeviceUtil {
 		if (imsi != null)
 		{
 			if (imsi.startsWith("46000") || imsi.startsWith("46002"))
-			{
 				info.put("provider", "移动");
-			}
 			else if (imsi.startsWith("46001"))
-			{
 				info.put("provider", "联通");
-			}
 			else if (imsi.startsWith("46003"))
-			{
 				info.put("provider", "电信");
-			}
 			else
-			{
 				info.put("provider", "其他");
-			}
 		}
 		else
-		{
 			info.put("provider", null);
-		}
 		info.put("imei", manager.getDeviceId());
 		info.put("version", manager.getDeviceSoftwareVersion());
 		return info;
@@ -98,9 +80,7 @@ public class DeviceUtil {
 		{
 			e.printStackTrace();
 			if (alert)
-			{
 				ToastUtil.showToast(activity, "由于安全软件限制，无法拨打电话");
-			}
 		}
 	}
 
@@ -115,9 +95,7 @@ public class DeviceUtil {
 		{
 			e.printStackTrace();
 			if (alert)
-			{
 				ToastUtil.showToast(activity, "由于安全软件限制，无法发送短信");
-			}
 		}
 	}
 

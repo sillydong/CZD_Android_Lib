@@ -38,13 +38,9 @@ public class APKUtil {
 	public static void launch(Activity activity, String package_name) throws Exception {
 		Intent intent = activity.getPackageManager().getLaunchIntentForPackage(package_name);
 		if (intent != null)
-		{
 			activity.startActivity(intent);
-		}
 		else
-		{
 			throw new Exception("Package Not Found");
-		}
 	}
 
 	public static boolean isFirstLaunch(Activity activity) {

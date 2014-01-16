@@ -1,6 +1,8 @@
 package czd.lib.cache;
 
+import czd.lib.application.ApplicationUtil;
 import czd.lib.data.FileUtil;
+import czd.lib.data.PreferenceUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,11 +33,12 @@ public class JsonCache extends FileCache {
 	@Override
 	public boolean save(final String key, final Object value) {
 		cleanOld();
-		final File file = new File(this.path + this.name, genKey(key));
+		final File file = genFile(key);
 		if (file.exists() && file.isFile())
 			file.delete();
 		if (value instanceof JSONObject)
 		{
+			PreferenceUtil.writeLongPreference(ApplicationUtil.application_context, this.name, genKey(key), System.currentTimeMillis());
 			writer.execute(new Runnable() {
 				@Override
 				public void run() {
@@ -46,6 +49,7 @@ public class JsonCache extends FileCache {
 
 		else if (value instanceof JSONArray)
 		{
+			PreferenceUtil.writeLongPreference(ApplicationUtil.application_context, this.name, genKey(key), System.currentTimeMillis());
 			writer.execute(new Runnable() {
 				@Override
 				public void run() {
@@ -61,7 +65,7 @@ public class JsonCache extends FileCache {
 
 	@Override
 	public Object get(String key) {
-		File file = new File(this.path + this.name, genKey(key));
+		File file = genFile(key);
 		String data = new String(FileUtil.read(file));
 		if (data.startsWith("{") || data.startsWith("["))
 		{

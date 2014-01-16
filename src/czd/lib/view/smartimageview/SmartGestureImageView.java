@@ -1,13 +1,11 @@
 package czd.lib.view.smartimageview;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView.ScaleType;
 import czd.lib.cache.BitmapCache;
 import czd.lib.view.gestureimageview.GestureImageView;
 import czd.lib.view.progress.ProgressCircle;
@@ -29,42 +27,43 @@ public class SmartGestureImageView extends FrameLayout {
 	protected boolean loading = false;
 	protected SmartImageTask currentTask;
 	protected Context context;
-	protected Future<?> request;
 
 	protected GestureImageView imageview;
 	protected ProgressCircle progress;
-	private int width = 0, height = 0;
-	private String file;
+	protected int width = 0, height = 0;
+	protected String file;
+	protected boolean useloading = false;
+
+	protected Bitmap imagebitmap;
 
 	public SmartGestureImageView(Context context) {
 		super(context);
 		this.context = context;
-		initView();
+		initView(null);
 	}
 
 	public SmartGestureImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;
-		initView();
+		initView(attrs);
 	}
 
 	public SmartGestureImageView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		this.context = context;
-		initView();
+		initView(attrs);
 	}
 
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
-	private void initView() {
-		imageview = new GestureImageView(this.context);
-		imageview.setScaleType(ScaleType.CENTER_CROP);
+	private void initView(AttributeSet attrs) {
+		if (attrs == null)
+			imageview = new GestureImageView(this.context);
+		else
+			imageview = new GestureImageView(this.context, attrs);
 		imageview.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		imageview.setVisibility(View.INVISIBLE);
 		imageview.setRecycle(true);
-		if (Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB)
-		{
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 			imageview.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-		}
 		this.addView(imageview);
 		progress = new ProgressCircle(this.context);
 		progress.setLayoutParams(new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -78,7 +77,7 @@ public class SmartGestureImageView extends FrameLayout {
 		setImage(new WebImage(url));
 	}
 
-	public void setImageUrl(String url, final boolean useloading, SmartImageTask.OnCompleteListener completeListener) {
+	public void setImageUrl(String url, final boolean useloading, SmartImageListener completeListener) {
 		setImage(new WebImage(url), useloading, completeListener);
 	}
 
@@ -86,7 +85,7 @@ public class SmartGestureImageView extends FrameLayout {
 		setImage(new WebImage(url), useloading, fallbackResource);
 	}
 
-	public void setImageUrl(String url, final boolean useloading, final Integer fallbackResource, SmartImageTask.OnCompleteListener completeListener) {
+	public void setImageUrl(String url, final boolean useloading, final Integer fallbackResource, SmartImageListener completeListener) {
 		setImage(new WebImage(url), useloading, fallbackResource, completeListener);
 	}
 
@@ -108,7 +107,7 @@ public class SmartGestureImageView extends FrameLayout {
 		setImage(image, false, null, null);
 	}
 
-	public void setImage(final SmartImage image, final boolean useloading, final SmartImageTask.OnCompleteListener completeListener) {
+	public void setImage(final SmartImage image, final boolean useloading, final SmartImageListener completeListener) {
 		setImage(image, useloading, null, completeListener);
 	}
 
@@ -116,77 +115,83 @@ public class SmartGestureImageView extends FrameLayout {
 		setImage(image, useloading, fallbackResource, null);
 	}
 
-	public void setImage(final SmartImage image, final boolean useloading, final Integer fallbackResource, final SmartImageTask.OnCompleteListener completeListener) {
-		if (!loading || Thread.currentThread().isInterrupted())
+	public void setImage(final SmartImage image, final boolean useloading, final Integer fallbackResource, final SmartImageListener completeListener) {
+		if ((imagebitmap == null || imagebitmap.isRecycled()) && !loading)
 		{
-			loading = true;
-
-			progress.setVisibility(View.VISIBLE);
-
-			// Cancel any existing tasks for this image view
-			if (currentTask != null)
-			{
-				currentTask.cancel();
-				currentTask = null;
-			}
-
-			// Set up the new task
-			currentTask = new SmartImageTask(context, image);
-			currentTask.setOnCompleteHandler(new SmartImageTask.OnCompleteHandler() {
+			this.useloading = useloading;
+			currentTask = new SmartImageTask(context, image, new SmartImageTask.OnCompleteHandler() {
 				@Override
-				public void onComplete(Bitmap bitmap) {
+				public void onStart() {
+					super.onStart();
+					if (!loading)
+					{
+						loading = true;
+						if (useloading)
+							progress.setVisibility(View.VISIBLE);
+
+						if (completeListener != null)
+							completeListener.onStart();
+					}
+				}
+
+				@Override
+				public void onFailure() {
+					super.onFailure();
 					if (loading)
 					{
+						loading = false;
 						if (useloading)
-						{
 							progress.setVisibility(View.INVISIBLE);
-						}
-						file = BitmapCache.getInstance().getRealName(image.toString());
-						if (bitmap != null && !bitmap.isRecycled())
+
+						if (fallbackResource != null)
 						{
-							width = bitmap.getWidth();
-							height = bitmap.getHeight();
 							imageview.setAdjustViewBounds(false);
-							imageview.setImageBitmap(bitmap);
-							if (completeListener != null)
-							{
-								completeListener.onComplete(true);
-							}
+							imageview.setImageResource(fallbackResource);
+							imageview.setVisibility(View.VISIBLE);
 						}
-						else
-						{
-							// Set fallback resource
-							if (fallbackResource != null)
-							{
-								imageview.setAdjustViewBounds(false);
-								imageview.setImageResource(fallbackResource);
-							}
-							if (completeListener != null)
-							{
-								completeListener.onComplete(false);
-							}
-							loading = false;
-						}
+
+						if (completeListener != null)
+							completeListener.onFailure();
+					}
+				}
+
+				@Override
+				public void onSuccess(Bitmap bitmap) {
+					super.onSuccess(bitmap);
+					if (loading)
+					{
+						loading = false;
+						if (useloading)
+							progress.setVisibility(View.INVISIBLE);
+
+						file = BitmapCache.getInstance().getRealName(image.toString());
+						imagebitmap = bitmap;
+						width = imagebitmap.getWidth();
+						height = imagebitmap.getHeight();
+						imageview.setAdjustViewBounds(false);
+						imageview.setImageBitmap(imagebitmap);
 						imageview.setVisibility(View.VISIBLE);
+
+						if (completeListener != null)
+							completeListener.onSuccess();
 					}
 				}
 
 				@Override
 				public void onProgress(long current, long total) {
+					super.onProgress(current, total);
 					if (loading)
 					{
 						progress.setMax(total);
 						progress.setProgress(current);
 						if (completeListener != null)
-						{
 							completeListener.onProgress(current, total);
-						}
 					}
+
 				}
 			});
 
-			// Run the task in a threadpool
-			request = threadPool.submit(currentTask);
+			Future<?> request = threadPool.submit(currentTask);
 			if (request != null && context != null)
 			{
 				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
@@ -219,21 +224,22 @@ public class SmartGestureImageView extends FrameLayout {
 	}
 
 	public void recycle() {
-		loading = false;
-		if (request != null)
+		if (loading)
 		{
-			request.cancel(true);
-			if (context != null)
-			{
-				List<WeakReference<Future<?>>> requestList = requestMap.get(context);
-				if (requestList != null)
-				{
-					requestList.remove(request);
-				}
-			}
+			loading = false;
+			if (useloading)
+				progress.setVisibility(View.INVISIBLE);
+
 		}
+		if (currentTask != null)
+			currentTask.cancel();
+
 		imageview.setVisibility(View.INVISIBLE);
-		imageview.recycle();
+		if (imagebitmap != null && !imagebitmap.isRecycled())
+		{
+			imagebitmap.recycle();
+		}
+		imagebitmap = null;
 		width = 0;
 		height = 0;
 	}
@@ -258,9 +264,23 @@ public class SmartGestureImageView extends FrameLayout {
 		requestMap.remove(context);
 	}
 
-	public static void cancelAllTasks() {
+	public static void cancelAllTasks(boolean mayInterruptIfRunning) {
+		for (List<WeakReference<Future<?>>> requestList : requestMap.values())
+		{
+			if (requestList != null)
+			{
+				for (WeakReference<Future<?>> requestRef : requestList)
+				{
+					Future<?> request = requestRef.get();
+					if (request != null && !request.isCancelled())
+					{
+						request.cancel(mayInterruptIfRunning);
+					}
+				}
+			}
+		}
 		requestMap.clear();
-		threadPool.shutdownNow();
-		threadPool = Executors.newSingleThreadExecutor();
+		//threadPool.shutdownNow();
+		//threadPool = Executors.newSingleThreadExecutor();
 	}
 }

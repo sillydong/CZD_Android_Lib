@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    
-    <style name="drop_down_anim" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/pop_in</item>
-        <item name="android:windowExitAnimation">@anim/pop_out</item>
-    </style>
+
+	<style name="drop_down_anim" parent="android:Animation">
+		<item name="android:windowEnterAnimation">@anim/pop_in</item>
+		<item name="android:windowExitAnimation">@anim/pop_out</item>
+	</style>
 
 	<style name="Theme.PageIndicatorDefaults" parent="android:Theme">
 		<item name="vpiIconPageIndicatorStyle">@style/Widget.IconPageIndicator</item>

@@ -8,7 +8,7 @@ import java.util.Random;
  */
 public class Reversible {
 	public static String encode(String toencode, String key) {
-		String encrypt_key = MD5.encode(((int)(new Random().nextDouble() * 32000) + "").getBytes());
+		String encrypt_key = MD5.encode(((int)(new Random().nextDouble() * 32000) + "").getBytes(), false);
 		int ctr = 0;
 		StringBuilder result = new StringBuilder();
 		int len = toencode.length();
@@ -33,7 +33,7 @@ public class Reversible {
 	}
 
 	private static String passKey(String text, String key) {
-		String encrypt_key = MD5.encode(key.getBytes());
+		String encrypt_key = MD5.encode(key.getBytes(), false);
 		int ctr = 0;
 		StringBuilder result = new StringBuilder();
 		int len = text.length();

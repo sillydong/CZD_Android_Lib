@@ -19,7 +19,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected static final int DEFAULT_COLUMN_COUNT = 2;
 	protected static final int DEFAULT_SAVE_GAP = 300;
 
-	protected static final int MOVE_UP = 1, MOVE_DOWN = 2;
+	public static final int MOVE_UP = 1, MOVE_DOWN = 2;
 
 	protected int height = 0, width = 0, column_width = 0;
 	protected int lastY = 0;
@@ -28,7 +28,6 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected int column_gap = 10;
 	protected int column_count = DEFAULT_COLUMN_COUNT;
 	protected boolean done_init = false;
-	protected boolean handling = false;
 	protected boolean pulling = false;
 
 	protected LinearLayout container;
@@ -46,6 +45,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected OnClickListener click_listener = null;
 	protected WaterfallScrollListener scroll_listener = null;
 	protected WaterfallHandler handler = null;
+	protected OnInitListener init_listener = null;
 
 	protected boolean overscroll = false;
 
@@ -80,9 +80,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 		if (height != 0 && width != 0)
 		{
 			if (!done_init || container == null)
-			{
 				init();
-			}
 			else if (tall != getChildAt(0).getHeight())
 			{
 				tall = getChildAt(0).getHeight();
@@ -94,13 +92,10 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	@Override
 	public boolean onTouchEvent(MotionEvent ev) {
 		if (ev.getAction() == MotionEvent.ACTION_MOVE)
-		{
 			onStop = false;
-		}
 		return super.onTouchEvent(ev);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected void init() {
 		done_init = true;
 		this.setScrollbarFadingEnabled(true);
@@ -127,9 +122,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 				params.rightMargin = 0;
 			}
 			else
-			{
 				params.leftMargin = params.rightMargin = column_gap / 2;
-			}
 			column.setLayoutParams(params);
 			column.setOrientation(LinearLayout.VERTICAL);
 			container.addView(column);
@@ -139,6 +132,8 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 			recycle_position[i] = 0;
 			column_heights[i] = header_height + getPaddingTop();
 		}
+		if (init_listener != null)
+			init_listener.sendEmptyMessage(0);
 	}
 
 	protected void initScroll() {
@@ -180,15 +175,11 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
 		super.onScrollChanged(l, t, oldl, oldt);
 		if (onStop)
-		{
 			onStop = false;
-		}
 		if (item_count > 0)
 		{
 			if (scroll_listener != null)
-			{
 				scroll_listener.onScroll(this, l, t, oldl, oldt);
-			}
 			handler.sendMessageDelayed(handler.obtainMessage(0, t, oldt), 150);
 		}
 	}
@@ -197,15 +188,13 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected void onOverScrolled(int scrollX, int scrollY, boolean clampedX, boolean clampedY) {
 		super.onOverScrolled(scrollX, scrollY, clampedX, clampedY);
 		if (clampedY)
-		{
 			this.overscroll = true;
-		}
 	}
 
-	protected void handleView(int direction) {
-		if (item_count > 0 && !handling)
+	private void handleView(int direction) {
+		if (item_count > 0 && onStop)
 		{
-			handling = true;
+			//handling = true;
 			switch (direction)
 			{
 				case MOVE_DOWN:
@@ -217,52 +206,40 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 							for (int i = 0; i < column_count; i++)
 							{
 								int tmp_item_count = item_positions[i].size();
-								//recycle
-								for (int j = recycle_position[i]; j <= display_position[i]; j++)
+								if (tmp_item_count > 0)
 								{
-									WaterfallItem rec_item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(j);
-									if (item_positions[i].get(j) < lastY - rec_item.getItemHeight() - DEFAULT_SAVE_GAP)
+									//recycle
+									for (int j = recycle_position[i]; j < tmp_item_count; j++)
 									{
-										if (rec_item.isLoaded())
+										WaterfallItem rec_item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(j);
+										if (item_positions[i].get(j) < lastY - rec_item.getItemHeight() - DEFAULT_SAVE_GAP)
 										{
 											rec_item.recycle();
+											if (recycle_position[i] < tmp_item_count - 1)
+												recycle_position[i]++;
 										}
-										if (recycle_position[i] < tmp_item_count - 1)
+										else
+											break;
+									}
+									//load
+									for (int k = display_position[i]; k < tmp_item_count; k++)
+									{
+										int top_pos = item_positions[i].get(k);
+										WaterfallItem item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(k);
+										int bottom_pos = top_pos + item.getItemHeight();
+										if (bottom_pos < lastY - DEFAULT_SAVE_GAP)
 										{
-											recycle_position[i]++;
+											if (display_position[i] < tmp_item_count - 1)
+												display_position[i]++;
 										}
-									}
-									else
-									{
-										break;
-									}
-								}
-								//load
-								for (int k = display_position[i]; k < tmp_item_count; k++)
-								{
-									int top_pos = item_positions[i].get(k);
-									WaterfallItem item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(k);
-									int bottom_pos = top_pos + item.getItemHeight();
-									if (bottom_pos < lastY - DEFAULT_SAVE_GAP)
-									{
-										if (display_position[i] < tmp_item_count - 1)
+										else if (top_pos > lastY + height + DEFAULT_SAVE_GAP)
+											break;
+										else
 										{
-											display_position[i]++;
-										}
-									}
-									else if (top_pos > lastY + height + DEFAULT_SAVE_GAP)
-									{
-										break;
-									}
-									else
-									{
-										if (!item.isLoaded())
-										{
-											item.load();
-										}
-										if (display_position[i] < tmp_item_count - 1)
-										{
-											display_position[i]++;
+											if (onStop)
+												item.load();
+											if (display_position[i] < tmp_item_count - 1)
+												display_position[i]++;
 										}
 									}
 								}
@@ -279,52 +256,40 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 						public void run() {
 							for (int i = 0; i < column_count; i++)
 							{
-								//recycle
-								for (int j = display_position[i]; j >= recycle_position[i]; j--)
+								if (item_positions[i].size() > 0)
 								{
-									WaterfallItem rec_item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(j);
-									if (item_positions[i].get(j) > lastY + height + DEFAULT_SAVE_GAP)
+									//recycle
+									for (int j = display_position[i]; j >= 0; j--)
 									{
-										if (rec_item.isLoaded())
+										WaterfallItem rec_item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(j);
+										if (item_positions[i].get(j) > lastY + height + DEFAULT_SAVE_GAP)
 										{
 											rec_item.recycle();
+											if (display_position[i] > 0)
+												display_position[i]--;
 										}
-										if (display_position[i] > 0)
+										else
+											break;
+									}
+									//load
+									for (int k = recycle_position[i]; k >= 0; k--)
+									{
+										int top_pos = item_positions[i].get(k);
+										WaterfallItem item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(k);
+										int bottom_pos = top_pos + item.getItemHeight();
+										if (top_pos > lastY + height + DEFAULT_SAVE_GAP)
 										{
-											display_position[i]--;
+											if (recycle_position[i] > 0)
+												recycle_position[i]--;
 										}
-									}
-									else
-									{
-										break;
-									}
-								}
-								//load
-								for (int k = recycle_position[i]; k >= 0; k--)
-								{
-									int top_pos = item_positions[i].get(k);
-									WaterfallItem item = (WaterfallItem)((LinearLayout)container.getChildAt(i)).getChildAt(k);
-									int bottom_pos = top_pos + item.getItemHeight();
-									if (top_pos > lastY + height + DEFAULT_SAVE_GAP)
-									{
-										if (recycle_position[i] > 0)
+										else if (bottom_pos < lastY - DEFAULT_SAVE_GAP)
+											break;
+										else
 										{
-											recycle_position[i]--;
-										}
-									}
-									else if (bottom_pos < lastY - DEFAULT_SAVE_GAP)
-									{
-										break;
-									}
-									else
-									{
-										if (!item.isLoaded())
-										{
-											item.load();
-										}
-										if (recycle_position[i] > 0)
-										{
-											recycle_position[i]--;
+											if (onStop)
+												item.load();
+											if (recycle_position[i] > 0)
+												recycle_position[i]--;
 										}
 									}
 								}
@@ -337,7 +302,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 					break;
 			}
 
-			handling = false;
+			//handling = false;
 		}
 	}
 
@@ -490,6 +455,10 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 		this.scroll_listener = listener;
 	}
 
+	public void setOnInitListener(OnInitListener listener) {
+		this.init_listener = listener;
+	}
+
 	protected static class WaterfallHandler extends Handler {
 		WeakReference<AbstractWaterfallContainer> waterfall_weak;
 
@@ -509,32 +478,20 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 				{
 					waterfall.onStop = true;
 					if (msg.arg2 <= 0)
-					{
 						waterfall.handleView(MOVE_UP);
-					}
 					else if (msg.arg2 + waterfall.height >= waterfall.tall)
-					{
 						waterfall.handleView(MOVE_DOWN);
-					}
 					else if (msg.arg1 < msg.arg2)
 					{
 						if (waterfall.overscroll)
-						{
 							waterfall.handleView(MOVE_DOWN);
-						}
 						else
-						{
 							waterfall.handleView(MOVE_UP);
-						}
 					}
 					else if (msg.arg1 >= msg.arg2)
-					{
 						waterfall.handleView(MOVE_DOWN);
-					}
 					if (waterfall.scroll_listener != null)
-					{
 						waterfall.scroll_listener.onStop(msg.arg1);
-					}
 					waterfall.overscroll = false;
 				}
 				waterfall.lastY = waterfall.getScrollY();
@@ -542,5 +499,17 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 			}
 		}
 
+	}
+
+	public static class OnInitListener extends Handler {
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			onInit();
+		}
+
+		public void onInit() {
+
+		}
 	}
 }

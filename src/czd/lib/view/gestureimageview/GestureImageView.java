@@ -513,7 +513,7 @@ public class GestureImageView extends ImageView {
 	public void handleScale(float scale) {
 		if (gestureImageViewTouchListener != null)
 		{
-			gestureImageViewTouchListener.handleScale(scale, x, y);
+			gestureImageViewTouchListener.handleScale(scale, centerX, centerY);
 		}
 	}
 

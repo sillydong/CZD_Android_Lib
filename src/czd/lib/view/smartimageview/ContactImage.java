@@ -17,7 +17,7 @@ public class ContactImage implements SmartImage {
 		this.contactId = contactId;
 	}
 
-	public Bitmap getBitmap(Context context) {
+	public Bitmap getBitmap(Context context, SmartImageTask.OnCompleteHandler handler) {
 		Bitmap bitmap = null;
 		ContentResolver contentResolver = context.getContentResolver();
 
@@ -35,6 +35,11 @@ public class ContactImage implements SmartImage {
 		}
 
 		return bitmap;
+	}
+
+	@Override
+	public void cancel() {
+		
 	}
 
 }

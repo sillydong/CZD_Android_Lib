@@ -25,10 +25,8 @@ public class Timer {
 	public void stop(String what, boolean restart) {
 		stopTime = System.nanoTime();
 		if (restart)
-		{
 			start();
-		}
 		long val = (stopTime - startTime) / 1000L;
-		Log.e("Pull", what + ":" + val);
+		Log.e("CZD_Android_Lib", what + ":" + val);
 	}
 }

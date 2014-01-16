@@ -3,7 +3,13 @@ CZD_Android_Lib
 
 Android库，包含一些常用的函数，自己做了一些比较常用的View，比如瀑布流的View，并且集成了Github中几个比较热门的库，但是为了package名的统一和实现一些功能，做了一些修改，下面一一说明。
 
-包含的package包括:
+【更新记录】
+- 2013-01-16  
+	将android-async-http退回上一版本，最新版本无关内容过多。与官方库有不同，有更新，修改了可能造成"Invalid cookie header ..."的错误   
+	加入了Android-Bootstrap控件，好看的Button和EditText，字体文件在assets中  
+	完善了瀑布流的加载，不会因滑动过快造成不加载当前显示内容  
+
+【功能说明】
 - czd.lib.adapter 继承自BaseAdapter，包含ArrayList和JsonArray内容的两种adapter
 - czd.lib.application 包含ActivityUtil,APKUtil,ApplicationUtil,DeviceUtil,Timer
 - czd.lib.cache 将内容缓存到文件或内存，包含BitmapCache,FileCache,JsonCache,MemCache,StringCache
@@ -14,6 +20,7 @@ Android库，包含一些常用的函数，自己做了一些比较常用的View
 - czd.lib.view.abslistview.pull 下拉刷新的ListView和GridView
 - czd.lib.view.abslistview.recyclable 对元素执行回收操作
 - czd.lib.view.abslistview.stable 定长的ListView和GridView
+- czd.lib.view.bootstrap 源自**[Android-Bootstrap](https://github.com/Bearded-Hen/Android-Bootstrap)**
 - czd.lib.view.dropdown 下拉菜单
 - czd.lib.view.gestureimageview 源自**[gesture-imageview](https://github.com/jasonpolites/gesture-imageview)**
 - czd.lib.view.progress 三种展示进度的view

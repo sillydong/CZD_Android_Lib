@@ -1,7 +1,5 @@
 package czd.lib.cache;
 
-import czd.lib.encode.MD5;
-
 import java.lang.ref.SoftReference;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,17 +12,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MemCache implements CacheI<Object> {
 	protected static MemCache instance;
 	protected ConcurrentHashMap<String,SoftReference<Object>> mem;
-	
-	public MemCache(){
-		mem=new ConcurrentHashMap<String,SoftReference<Object>>();
+
+	public MemCache() {
+		mem = new ConcurrentHashMap<String,SoftReference<Object>>();
 	}
 
-	public static MemCache getInstance(){
-		if(instance==null)
-			instance=new MemCache();
+	public static MemCache getInstance() {
+		if (instance == null)
+			instance = new MemCache();
 		return instance;
 	}
-	
+
 	@Override
 	public boolean save(String key, Object value) {
 		mem.put(genKey(key), new SoftReference<Object>(value));
@@ -46,7 +44,14 @@ public class MemCache implements CacheI<Object> {
 
 	@Override
 	public boolean delete(String key) {
-		mem.remove(genKey(key));
+		if (key.endsWith("*"))
+		{
+			for (String keys : mem.keySet())
+				if (keys.startsWith(key))
+					mem.remove(keys);
+		}
+		else
+			mem.remove(genKey(key));
 		return true;
 	}
 
@@ -67,6 +72,11 @@ public class MemCache implements CacheI<Object> {
 
 	@Override
 	public String genKey(String key) {
-		return MD5.encode(key.getBytes());
+		return key;
+	}
+
+	@Override
+	public long gettime(String key) {
+		return 0L;
 	}
 }

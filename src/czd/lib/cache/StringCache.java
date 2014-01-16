@@ -1,6 +1,8 @@
 package czd.lib.cache;
 
+import czd.lib.application.ApplicationUtil;
 import czd.lib.data.FileUtil;
+import czd.lib.data.PreferenceUtil;
 
 import java.io.File;
 
@@ -36,6 +38,7 @@ public class StringCache extends AbsFileCache<String> implements CacheI<String> 
 				FileUtil.write(file, value.getBytes());
 			}
 		});
+		PreferenceUtil.writeLongPreference(ApplicationUtil.application_context, this.name, genKey(key), System.currentTimeMillis());
 		return true;
 	}
 
