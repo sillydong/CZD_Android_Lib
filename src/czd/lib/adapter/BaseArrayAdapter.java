@@ -33,6 +33,16 @@ public abstract class BaseArrayAdapter extends android.widget.BaseAdapter {
 		this.datas.addAll(datas);
 		notifyDataSetChanged();
 	}
+	
+	public void removeItem(int position){
+		this.datas.remove(position);
+		notifyDataSetChanged();
+	}
+	
+	public void cleanItems(){
+		this.datas.clear();
+		notifyDataSetChanged();
+	}
 
 	@Override
 	public int getCount() {

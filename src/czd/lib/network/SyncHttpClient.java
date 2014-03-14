@@ -68,6 +68,8 @@ public class SyncHttpClient extends AsyncHttpClient {
 		}
 
 		responseHandler.setUseSynchronousMode(true);
+		if (responseHandler instanceof RangeFileAsyncHttpResponseHandler)
+			((RangeFileAsyncHttpResponseHandler)responseHandler).updateRequestHeaders(uriRequest);
 
 		/*
 		 * will execute the request directly

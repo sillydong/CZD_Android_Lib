@@ -4,6 +4,12 @@ CZD_Android_Lib
 Android库，包含一些常用的函数，自己做了一些比较常用的View，比如瀑布流的View，并且集成了Github中几个比较热门的库，但是为了package名的统一和实现一些功能，做了一些修改，下面一一说明。
 
 【更新记录】
+- 2014-03-14
+	重写SmartImageView，使用android-async-http的SyncHttpClient来加载图片，启用cookie，以方便加载验证码图片。支持视频缩略图，联系人图和网络图片。  
+	修改android-async-http的重定向设置部分代码，避免因URL中出现空格引起的URISyntaxException  
+	增加RangeFileAsyncHttpResponseHandler，支持对文件进行断点续传  
+	优化BaseArrayAdapter和BaseJsonAdapter，添加删除元素方法  
+	增加晃动动画的xml  
 - 2013-01-16  
 	将android-async-http退回上一版本，最新版本无关内容过多。与官方库有不同，有更新，修改了可能造成"Invalid cookie header ..."的错误   
 	加入了Android-Bootstrap控件，好看的Button和EditText，字体文件在assets中  

@@ -16,10 +16,10 @@ import czd.lib.view.ViewUtil;
 
 public class PullListView extends ListView implements OnScrollListener {
 
-	private static final int STATE_RELEASETOREFRESH = 0;
-	private static final int STATE_PULLTOREFRESH = 1;
-	private static final int STATE_REFRESHING = 2;
-	private static final int STATE_DONE = 3;
+	public static final int STATE_RELEASETOREFRESH = 0;
+	public static final int STATE_PULLTOREFRESH = 1;
+	public static final int STATE_REFRESHING = 2;
+	public static final int STATE_DONE = 3;
 
 	private static final int RATIO = 3;
 
@@ -277,6 +277,10 @@ public class PullListView extends ListView implements OnScrollListener {
 		}
 	}
 
+	public int getHeaderState() {
+		return state;
+	}
+
 	public void setHeaderInfo(String text) {
 		this.header_itv.setText(text);
 		if (this.header_itv.getVisibility() != View.VISIBLE)
@@ -294,7 +298,7 @@ public class PullListView extends ListView implements OnScrollListener {
 		this.refreshable = true;
 	}
 
-	public void onRefreshComplete() {
+	public void setHeaderDone() {
 		state = STATE_DONE;
 		resetHeader();
 		invalidateViews();

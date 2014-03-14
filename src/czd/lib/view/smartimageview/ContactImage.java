@@ -3,8 +3,8 @@ package czd.lib.view.smartimageview;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.provider.ContactsContract;
 
@@ -17,29 +17,49 @@ public class ContactImage implements SmartImage {
 		this.contactId = contactId;
 	}
 
-	public Bitmap getBitmap(Context context, SmartImageTask.OnCompleteHandler handler) {
-		Bitmap bitmap = null;
-		ContentResolver contentResolver = context.getContentResolver();
-
+	@Override
+	public void getBitmap(Context context, AbsSmartView.ViewHandler handler) {
+		handler.sendEmptyMessage(AbsSmartView.MSG_START);
 		try
 		{
-			Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
-			InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, uri);
-			if (input != null)
+			ContentResolver contentResolver = context.getContentResolver();
+
+			if (ContactsContract.Contacts.CONTENT_URI != null)
 			{
-				bitmap = BitmapFactory.decodeStream(input);
+				Uri uri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId);
+				if (uri != null)
+				{
+					InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, uri);
+					if (input != null)
+					{
+						BitmapFactory.Options o = new BitmapFactory.Options();
+						o.inPurgeable = true;
+						o.inInputShareable = true;
+						handler.sendMessage(handler.obtainMessage(AbsSmartView.MSG_SUCCESS, BitmapFactory.decodeStream(input, new Rect(0, 0, 0, 0), o)));
+					}
+					else
+						handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
+				}
+				else
+					handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
 			}
+			else
+				handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
 		}
+		handler.sendEmptyMessage(AbsSmartView.MSG_FINISH);
+	}
 
-		return bitmap;
+
+	@Override
+	public void recycle() {
+
 	}
 
 	@Override
-	public void cancel() {
-		
+	public String toString() {
+		return super.toString();
 	}
-
 }

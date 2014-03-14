@@ -421,10 +421,6 @@ public class GestureImageView extends ImageView {
 		}
 	}
 
-	public void setImageUrl(String url) {
-
-	}
-
 	public void setImageBitmap(Bitmap image) {
 		this.drawable = new BitmapDrawable(getResources(), image);
 		initImage();

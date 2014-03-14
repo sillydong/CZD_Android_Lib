@@ -34,6 +34,16 @@ public abstract class BaseJsonAdapter extends android.widget.BaseAdapter {
 		this.datas = JSONUtil.combineArrays(this.datas, datas);
 		notifyDataSetChanged();
 	}
+	
+	public void removeItem(int position){
+		this.datas=JSONUtil.removeAtIndex(this.datas,position);
+		notifyDataSetChanged();
+	}
+	
+	public void cleanAll(){
+		this.datas=new JSONArray();
+		notifyDataSetChanged();
+	}
 
 	@Override
 	public int getCount() {

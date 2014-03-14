@@ -44,12 +44,14 @@ public class LoadingFooter extends LinearLayout {
 	public void nomore(String info) {
 		if (loading.getVisibility() == View.VISIBLE)
 		{
-			loading.setVisibility(View.INVISIBLE);
+			loading.setVisibility(View.GONE);
 		}
 		if (info != null && info.length() > 0)
 		{
 			done.setText(info);
 			done.setVisibility(View.VISIBLE);
 		}
+		else
+			done.setVisibility(View.GONE);
 	}
 }

@@ -20,6 +20,8 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 	protected static final int DEFAULT_SAVE_GAP = 300;
 
 	public static final int MOVE_UP = 1, MOVE_DOWN = 2;
+	
+	protected int direction=MOVE_DOWN;
 
 	protected int height = 0, width = 0, column_width = 0;
 	protected int lastY = 0;
@@ -84,7 +86,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 			else if (tall != getChildAt(0).getHeight())
 			{
 				tall = getChildAt(0).getHeight();
-				handleView(MOVE_DOWN);
+				handleView();
 			}
 		}
 	}
@@ -191,11 +193,10 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 			this.overscroll = true;
 	}
 
-	private void handleView(int direction) {
+	public void handleView() {
 		if (item_count > 0 && onStop)
 		{
-			//handling = true;
-			switch (direction)
+			switch (this.direction)
 			{
 				case MOVE_DOWN:
 					//下滑
@@ -236,8 +237,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 											break;
 										else
 										{
-											if (onStop)
-												item.load();
+											item.load();
 											if (display_position[i] < tmp_item_count - 1)
 												display_position[i]++;
 										}
@@ -286,8 +286,7 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 											break;
 										else
 										{
-											if (onStop)
-												item.load();
+											item.load();
 											if (recycle_position[i] > 0)
 												recycle_position[i]--;
 										}
@@ -302,7 +301,6 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 					break;
 			}
 
-			//handling = false;
 		}
 	}
 
@@ -476,20 +474,36 @@ public abstract class AbstractWaterfallContainer extends ScrollView {
 				//msg.arg2 -> oldt
 				if (!waterfall.onStop && msg.arg1 == waterfall.lastY)
 				{
+					//stop
 					waterfall.onStop = true;
 					if (msg.arg2 <= 0)
-						waterfall.handleView(MOVE_UP);
+					{
+						waterfall.direction=MOVE_UP;
+						waterfall.handleView();
+					}
 					else if (msg.arg2 + waterfall.height >= waterfall.tall)
-						waterfall.handleView(MOVE_DOWN);
+					{
+						waterfall.direction =MOVE_DOWN;
+						waterfall.handleView();
+					}
 					else if (msg.arg1 < msg.arg2)
 					{
 						if (waterfall.overscroll)
-							waterfall.handleView(MOVE_DOWN);
+						{
+							waterfall.direction =MOVE_DOWN;
+							waterfall.handleView();
+						}
 						else
-							waterfall.handleView(MOVE_UP);
+						{
+							waterfall.direction =MOVE_UP;
+							waterfall.handleView();
+						}
 					}
 					else if (msg.arg1 >= msg.arg2)
-						waterfall.handleView(MOVE_DOWN);
+					{
+						waterfall.direction =MOVE_DOWN;
+						waterfall.handleView();
+					}
 					if (waterfall.scroll_listener != null)
 						waterfall.scroll_listener.onStop(msg.arg1);
 					waterfall.overscroll = false;

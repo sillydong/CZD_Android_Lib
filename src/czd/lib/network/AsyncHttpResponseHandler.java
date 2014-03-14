@@ -435,4 +435,9 @@ public abstract class AsyncHttpResponseHandler implements ResponseHandlerInterfa
 		}
 		return responseBody;
 	}
+	
+	public void cancel(){
+		if(!Thread.currentThread().isInterrupted())
+			Thread.currentThread().interrupt();
+	}
 }

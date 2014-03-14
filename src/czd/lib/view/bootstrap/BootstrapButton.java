@@ -126,8 +126,8 @@ public class BootstrapButton extends FrameLayout {
 		float fontSize = 14.0f;
 		float scale = getResources().getDisplayMetrics().density; //for padding
 		String size = "default";
-		int paddingA = (int)(10 * scale + 0.5f);
-		int paddingB = (int)(15 * scale + 0.5f);
+		int paddingA = (int)(6 * scale + 0.5f);
+		int paddingB = (int)(12 * scale + 0.5f);
 
 
 		//attribute values
@@ -176,7 +176,7 @@ public class BootstrapButton extends FrameLayout {
 		int layoutWidth = 0;
 		if (a.getString(R.styleable.BootstrapButton_android_layout_width) != null)
 		{
-			layoutWidth = a.getInt(R.styleable.BootstrapButton_android_layout_width, 0);
+			layoutWidth = a.getLayoutDimension(R.styleable.BootstrapButton_android_layout_width, 0);
 		}
 
 		//works even if it's fill_parent or match_parent 
@@ -222,8 +222,8 @@ public class BootstrapButton extends FrameLayout {
 		if (size.equals("large"))
 		{
 			fontSize = 20.0f;
-			paddingA = (int)(15 * scale + 0.5f);
-			paddingB = (int)(20 * scale + 0.5f);
+			paddingA = (int)(12 * scale + 0.5f);
+			paddingB = (int)(16 * scale + 0.5f);
 		}
 
 		if (size.equals("small"))

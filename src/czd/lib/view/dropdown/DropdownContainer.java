@@ -6,11 +6,8 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.widget.AbsListView;
+import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.GridView;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import czd.lib.R;
 
 public class DropdownContainer extends PopupWindow {
@@ -18,21 +15,17 @@ public class DropdownContainer extends PopupWindow {
 		super(context);
 	}
 
-	public DropdownContainer(Context context, int layout_id, Drawable background, DropdownAdapter adapter, OnItemClickListener listener) throws Exception {
+	public DropdownContainer(Context context, int layout_id, Drawable background, DropdownAdapter adapter, OnItemClickListener listener) {
 		super(context);
 		int m = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
 		AbsListView content = (AbsListView)LayoutInflater.from(context).inflate(layout_id, null);
 		if (content instanceof ListView)
 		{
-			((ListView)content).setAdapter(adapter);
+			((ListView)content).setAdapter((BaseAdapter)adapter);
 		}
 		else if (content instanceof GridView)
 		{
-			((GridView)content).setAdapter(adapter);
-		}
-		else
-		{
-			throw new Exception("not an AbsListView");
+			((GridView)content).setAdapter((BaseAdapter)adapter);
 		}
 		content.setOnItemClickListener(listener);
 		content.measure(m, m);
@@ -46,7 +39,6 @@ public class DropdownContainer extends PopupWindow {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private void init(final View view, int width, int height, int anim, Drawable background) {
 		setContentView(view);
 		if (anim != 0)

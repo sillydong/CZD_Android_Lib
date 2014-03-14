@@ -136,7 +136,7 @@ public class JsonHttpResponseHandler extends TextHttpResponseHandler {
 								}
 								else
 								{
-									onFailure(statusCode, headers, jsonResponse.toString(),new JSONException("Unexpected response type " + jsonResponse.getClass().getName()));
+									onFailure(statusCode, headers, jsonResponse.toString(), new JSONException("Unexpected response type " + jsonResponse.getClass().getName()));
 								}
 
 							}
@@ -186,7 +186,7 @@ public class JsonHttpResponseHandler extends TextHttpResponseHandler {
 								}
 								else
 								{
-									onFailure(statusCode, headers, jsonResponse.toString(),new JSONException("Unexpected response type " + jsonResponse.getClass().getName()));
+									onFailure(statusCode, headers, jsonResponse.toString(), new JSONException("Unexpected response type " + jsonResponse.getClass().getName()));
 								}
 							}
 						});
@@ -206,8 +206,8 @@ public class JsonHttpResponseHandler extends TextHttpResponseHandler {
 		}
 		else
 		{
-			Log.v(LOG_TAG, "response body is null, calling onFailure(Throwable, JSONObject)");
-			onFailure(statusCode, headers, throwable, (JSONObject)null);
+			Log.v(LOG_TAG, "response body is null, calling onFailure(Throwable, String)");
+			onFailure(statusCode, headers, "null response", throwable);
 		}
 	}
 
