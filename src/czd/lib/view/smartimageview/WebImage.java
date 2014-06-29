@@ -2,199 +2,165 @@ package czd.lib.view.smartimageview;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import czd.lib.application.ApplicationUtil;
 import czd.lib.cache.BitmapCache;
-import czd.lib.data.ImageUtil;
-import czd.lib.network.BinaryHttpResponseHandler;
-import czd.lib.network.PersistentCookieStore;
-import czd.lib.network.RangeFileAsyncHttpResponseHandler;
-import czd.lib.network.SyncHttpClient;
-import org.apache.http.Header;
+import czd.lib.view.smartimageview.SmartImageTask.OnCompleteHandler;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
-//import android.util.Log;
-
-/**
- * Created with IntelliJ IDEA.
- * User: chenzhidong
- * Date: 14-3-10
- * Time: 上午9:55
- */
 public class WebImage implements SmartImage {
 	private String url;
-	private boolean usecache = true;
-	private Bitmap image;
-
-	protected static SyncHttpClient client;
+	private boolean cancel=false;
 
 	public WebImage(String url) {
-		this.url = url.replaceAll(" ","%20");
-		initClient();
-	}
-
-	public WebImage(String url, boolean usecache) {
 		this.url = url.replaceAll(" ", "%20");
-		this.usecache = usecache;
-		initClient();
-	}
-
-	private void initClient() {
-		if (client == null)
-		{
-			client = new SyncHttpClient();
-			client.setTimeout(2000);
-			client.setCookieStore(new PersistentCookieStore(ApplicationUtil.application_context));
-			client.setMaxRetriesAndTimeout(2, 2000);
-			if(!AbsSmartView.useragent.equals(""))
-				client.setUserAgent(AbsSmartView.useragent);
-			client.setEnableRedirects(true);
-		}
 	}
 
 	@Override
-	public void getBitmap(Context context, final AbsSmartView.ViewHandler handler) {
-		if (client != null && (image == null || image.isRecycled()))
+	public Bitmap getBitmap(Context context, OnCompleteHandler handler) {
+
+		Bitmap bitmap = null;
+		if (!cancel && url != null)
 		{
-			if (usecache)
+			bitmap = BitmapCache.getInstance().get(url);
+			if (bitmap == null || bitmap.isRecycled())
 			{
-				image = BitmapCache.getInstance().get(url);
-				if (image == null || image.isRecycled())
+				if (getImageFromUrl(url, handler))
 				{
-					client.get(context, url, new RangeFileAsyncHttpResponseHandler(new File(BitmapCache.getInstance().getRealName(url))) {
-						@Override
-						public void onFailure(int statusCode, Header[] headers, Throwable throwable, File file) {
-							//Log.v("Pull", "image file failure");
-							if (!Thread.currentThread().isInterrupted() && handler != null)
-								handler.sendEmptyMessage(SmartImageView.MSG_FAILURE);
-						}
-
-						@Override
-						public void onSuccess(int statusCode, Header[] headers, File file) {
-							//Log.v("Pull", "image file success");
-							if (!Thread.currentThread().isInterrupted())
-							{
-								image = ImageUtil.getBitmapFromFile(file);
-								if (image != null && !image.isRecycled())
-								{
-									if (handler != null)
-										handler.sendMessage(handler.obtainMessage(SmartImageView.MSG_SUCCESS, image));
-								}
-								else
-								{
-									if (handler != null)
-										handler.sendEmptyMessage(SmartImageView.MSG_FAILURE);
-								}
-							}
-						}
-
-						@Override
-						public void onStart() {
-							super.onStart();
-							//Log.v("Pull", "image file start");
-							if (!Thread.currentThread().isInterrupted() && handler != null)
-								handler.sendEmptyMessage(SmartImageView.MSG_START);
-						}
-
-						@Override
-						public void onFinish() {
-							super.onFinish();
-							//Log.v("Pull", "image file finish");
-							if (!Thread.currentThread().isInterrupted() && handler != null)
-								handler.sendEmptyMessage(SmartImageView.MSG_FINISH);
-						}
-
-						@Override
-						public void onProgress(int bytesWritten, int totalSize) {
-							super.onProgress(bytesWritten, totalSize);
-							//Log.v("Pull", "image file progress");
-							if (!Thread.currentThread().isInterrupted() && handler != null)
-								handler.sendMessage(handler.obtainMessage(SmartImageView.MSG_PROGRESS, bytesWritten, totalSize));
-						}
-					});
+					bitmap = BitmapCache.getInstance().get(url);
 				}
-				else
-				{
-					if (!Thread.currentThread().isInterrupted() && handler != null)
-					{
-						//Log.v("Pull", "use cache");
-						handler.sendEmptyMessage(SmartImageView.MSG_START);
-						handler.sendMessage(handler.obtainMessage(SmartImageView.MSG_SUCCESS, image));
-						handler.sendEmptyMessage(SmartImageView.MSG_FINISH);
-					}
-				}
-			}
-			else
-			{
-				client.get(context, url, new BinaryHttpResponseHandler() {
-					@Override
-					public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-						//Log.v("Pull", "image binary success");
-						if (!Thread.currentThread().isInterrupted())
-						{
-							BitmapFactory.Options o = new BitmapFactory.Options();
-							o.inPurgeable = true;
-							o.inInputShareable = true;
-							image = BitmapFactory.decodeByteArray(binaryData, 0, binaryData.length, o);
-							if (image != null && !image.isRecycled())
-							{
-								if (handler != null)
-									handler.sendMessage(handler.obtainMessage(SmartImageView.MSG_SUCCESS, image));
-							}
-							else
-							{
-								if (handler != null)
-									handler.sendEmptyMessage(SmartImageView.MSG_FAILURE);
-							}
-						}
-					}
-
-					@Override
-					public void onFailure(int statusCode, Header[] headers, byte[] binaryData, Throwable error) {
-						//Log.v("Pull", "image binary failure");
-						if (!Thread.currentThread().isInterrupted() && handler != null)
-							handler.sendEmptyMessage(SmartImageView.MSG_FAILURE);
-					}
-
-					@Override
-					public void onStart() {
-						super.onStart();
-						//Log.v("Pull", "image binary start");
-						if (!Thread.currentThread().isInterrupted() && handler != null)
-							handler.sendEmptyMessage(SmartImageView.MSG_START);
-					}
-
-					@Override
-					public void onFinish() {
-						super.onFinish();
-						//Log.v("Pull", "image binary finish");
-						if (!Thread.currentThread().isInterrupted() && handler != null)
-							handler.sendEmptyMessage(SmartImageView.MSG_FINISH);
-					}
-
-					@Override
-					public void onProgress(int bytesWritten, int totalSize) {
-						super.onProgress(bytesWritten, totalSize);
-						//Log.v("Pull", "image binary progress");
-						if (!Thread.currentThread().isInterrupted() && handler != null)
-							handler.sendMessage(handler.obtainMessage(SmartImageView.MSG_PROGRESS, bytesWritten, totalSize));
-					}
-				});
 			}
 		}
+		return bitmap;
 	}
 
-	@Override
-	public void recycle() {
-		//Log.v("Pull", "image recycle");
-		if (this.image != null && !this.image.isRecycled())
-			this.image.recycle();
-		this.image = null;
+	public Bitmap getBitmap(Context context, int width, int height, OnCompleteHandler handler) {
+
+		Bitmap bitmap = null;
+		if (!cancel && url != null)
+		{
+			bitmap = BitmapCache.getInstance().get(url);
+			if (bitmap == null || bitmap.isRecycled())
+			{
+				if (getImageFromUrl(url, handler))
+				{
+					bitmap = BitmapCache.getInstance().get(url);
+				}
+			}
+		}
+		return bitmap;
 	}
 
+	public void cancel(){
+		this.cancel=true;
+		Thread.currentThread().interrupt();
+	}
+	
 	@Override
 	public String toString() {
 		return url;
 	}
+
+	public static void removeFromCache(String url) {
+		BitmapCache.getInstance().delete(url);
+	}
+
+	private void sendProgressMessage(OnCompleteHandler handler, long current, long total) {
+		handler.sendMessage(handler.obtainMessage(SmartImageTask.MSG_PROGRESS, new Object[]{current, total}));
+	}
+
+	private boolean getImageFromUrl(String url, OnCompleteHandler handler) {
+		if (cancel)
+			return false;
+		String filepath = BitmapCache.getInstance().getRealName(url);
+		String tmp_filepath=filepath+".tmp";
+		InputStream is = null;
+		FileOutputStream os = null;
+		try
+		{
+			File file = new File(tmp_filepath);
+			boolean append;
+			long current = 0;
+			long total = 0;
+			if (!file.exists() && file.getParentFile().canWrite())
+			{
+				if (!file.createNewFile())
+					return false;
+				append = false;
+			}
+			else if (!file.canWrite())
+			{
+				return false;
+			}
+			else
+			{
+				append = true;
+				current = file.length();
+			}
+			HttpURLConnection conn = (HttpURLConnection)new URL(url).openConnection();
+			conn.setConnectTimeout(3000);
+			conn.setUseCaches(true);
+			conn.setInstanceFollowRedirects(true);
+			if (current > 0)
+				conn.setRequestProperty("RANGE", "bytes=" + current + "-");
+
+			if (cancel)
+				return false;
+			int code = conn.getResponseCode();
+			if (code == 416)
+			{
+				sendProgressMessage(handler, current, current);
+				file.renameTo(new File(filepath));
+				return true;
+			}
+			else if (code > 300)
+				return false;
+			else
+			{
+				String header = conn.getHeaderField("Content-Range");
+				if (header == null || header.length() == 0)
+				{
+					append = false;
+					current = 0;
+				}
+
+				os = new FileOutputStream(file, append);
+				is = conn.getInputStream();
+				total = conn.getContentLength() + current;
+				int k = 0;
+				byte[] buffer = new byte[4096];
+				while (!cancel && !Thread.currentThread().isInterrupted() && current < total && (k = is.read(buffer, 0, 4096)) > 0)
+				{
+					os.write(buffer, 0, k);
+					current += k;
+					sendProgressMessage(handler, current, total);
+				}
+				os.flush();
+				if(!cancel && !Thread.currentThread().isInterrupted())
+					file.renameTo(new File(filepath));
+				return !cancel;
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (is != null)
+					is.close();
+				if (os != null)
+					os.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+
 }

@@ -21,24 +21,11 @@ public class VideoImage implements SmartImage {
 	}
 
 	@Override
-	public void getBitmap(Context context, AbsSmartView.ViewHandler handler) {
-		handler.sendEmptyMessage(AbsSmartView.MSG_START);
-		try
-		{
-			Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Video.Thumbnails.MICRO_KIND);
-			if (bitmap != null && !bitmap.isRecycled())
-				handler.sendMessage(handler.obtainMessage(AbsSmartView.MSG_SUCCESS, bitmap));
-			else
-				handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
-		} catch (Exception e)
-		{
-			handler.sendEmptyMessage(AbsSmartView.MSG_FAILURE);
-		}
-		handler.sendEmptyMessage(AbsSmartView.MSG_FINISH);
+	public Bitmap getBitmap(Context context, SmartImageTask.OnCompleteHandler handler) {
+		return ThumbnailUtils.createVideoThumbnail(file.getAbsolutePath(), MediaStore.Video.Thumbnails.MICRO_KIND);
 	}
 
 	@Override
-	public void recycle() {
-
+	public void cancel() {
 	}
 }

@@ -1,11 +1,11 @@
 package czd.lib.view.smartimageview;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 public interface SmartImage {
-	public void getBitmap(Context context, AbsSmartView.ViewHandler handler);
+	public Bitmap getBitmap(Context context, SmartImageTask.OnCompleteHandler handler);
+	
+	public void cancel();
 
-	public void recycle();
-
-	public String toString();
 }
