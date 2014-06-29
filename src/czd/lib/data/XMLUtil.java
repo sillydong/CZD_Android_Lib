@@ -18,11 +18,10 @@ public class XMLUtil {
 			XmlPullParser parser = Xml.newPullParser();
 			parser.setInput(is, "UTF-8");
 			int event_type = parser.getEventType();
-			boolean is_done = false;
 
 			Object obj = null;
 			String name = "";
-			while ((event_type != XmlPullParser.END_DOCUMENT) && !is_done)
+			while (event_type != XmlPullParser.END_DOCUMENT)
 			{
 				switch (event_type)
 				{

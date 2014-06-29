@@ -49,7 +49,7 @@ abstract class AbsFileCache<T> implements CacheI<T> {
 	@Override
 	public boolean exists(String key) {
 		File file = genFile(key);
-		return file.exists() && file.isFile() && file.canRead();
+		return file.exists() && file.isFile() && file.canRead() && file.length()>0;
 	}
 
 	@Override

@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore.MediaColumns;
+import android.util.Log;
 import czd.lib.application.ApplicationUtil;
 
 import java.io.*;
@@ -29,7 +30,7 @@ public class ImageUtil {
 		try
 		{
 			HttpURLConnection conn = (HttpURLConnection)new URL(url).openConnection();
-			conn.setConnectTimeout(2000);
+			conn.setConnectTimeout(3000);
 			conn.setUseCaches(true);
 			conn.setInstanceFollowRedirects(true);
 			BitmapFactory.Options o2 = new BitmapFactory.Options();
@@ -57,6 +58,42 @@ public class ImageUtil {
 		} catch (OutOfMemoryError e)
 		{
 			e.printStackTrace();
+			Log.e("Pull",file.getAbsolutePath());
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		} finally
+		{
+			try
+			{
+				if (fis != null)
+					fis.close();
+				if (bis != null)
+					bis.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+	
+	public static Bitmap getBitmapFromFile(File file,int scale){
+		final BitmapFactory.Options o2 = new BitmapFactory.Options();
+		o2.inPurgeable = true;
+		o2.inInputShareable = true;
+		o2.inSampleSize = scale;
+		BufferedInputStream bis = null;
+		FileInputStream fis = null;
+		try
+		{
+			fis = new FileInputStream(file);
+			bis = new BufferedInputStream(fis);
+			return BitmapFactory.decodeStream(bis, new Rect(-1, -1, -1, -1), o2);
+		} catch (OutOfMemoryError e)
+		{
+			Log.v("Pull","scale:"+(scale+1));
+			return getBitmapFromFile(file,scale+1);
 		} catch (IOException e)
 		{
 			e.printStackTrace();

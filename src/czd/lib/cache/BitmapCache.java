@@ -69,7 +69,7 @@ public class BitmapCache extends AbsFileCache<Bitmap> implements CacheI<Bitmap> 
 		{
 			try
 			{
-				return ImageUtil.getBitmapFromFile(file);
+				return ImageUtil.getBitmapFromFile(file,2);
 			} catch (OutOfMemoryError e)
 			{
 				return null;
